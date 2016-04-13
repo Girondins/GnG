@@ -23,19 +23,17 @@ public class MainActivity extends Activity {
     private double latitude;
     private double longitude;
     private String provider;
-    
     private MapFragment mapFragment;
     private GoogleMap map;
-    
-    @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //  initateMap();
+        //  initMap();
     }
     
     
-    public void initateMap() {
+    public void initMap() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationList();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
