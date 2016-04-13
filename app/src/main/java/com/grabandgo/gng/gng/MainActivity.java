@@ -15,6 +15,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 
 /**
  * Main activity, GNG Map and navigation.
+ * Brachn kasbdsfouds
  */
 public class MainActivity extends Activity {
     private LocationManager locationManager;
