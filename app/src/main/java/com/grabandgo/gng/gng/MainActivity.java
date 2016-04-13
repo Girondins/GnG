@@ -31,6 +31,10 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         //  initMap();
     }
+
+    private int kuken(int kukar){
+        return kukar;
+    }
     
     
     public void initMap() {
