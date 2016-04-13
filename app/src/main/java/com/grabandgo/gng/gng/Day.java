@@ -1,9 +1,11 @@
 package com.grabandgo.gng.gng;
 
+import java.io.Serializable;
+
 /**
  * Created by alexander on 2016-04-13.
  */
-public class Day {
+public class Day implements Serializable{
     private String openHours;
     private String closedHours;
 

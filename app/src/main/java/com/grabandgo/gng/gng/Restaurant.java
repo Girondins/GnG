@@ -4,12 +4,13 @@ import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
 /**
  * Created by alexander on 2016-04-13.
  */
-public class Restaurant {
+public class Restaurant implements Serializable{
 
     private String name;
     private String address;
