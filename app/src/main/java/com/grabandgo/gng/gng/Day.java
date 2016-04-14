@@ -1,21 +1,10 @@
 package com.grabandgo.gng.gng;
 
-/**
- * Created by alexander on 2016-04-13.
- */
 public class Day {
     private String openHours;
     private String closedHours;
 
-
-
-
-
-
-    public Day(){
-
-    }
-
+    public Day(){}
 
     public void setOpenHours(String openHours){
         this.openHours = openHours;
