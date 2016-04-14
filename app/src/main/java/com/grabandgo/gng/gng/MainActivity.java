@@ -2,6 +2,8 @@ package com.grabandgo.gng.gng;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -9,6 +11,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,6 +34,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //  initMap();
+        StartUpActivity startUpActivity = new StartUpActivity();
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.activity_main, startUpActivity);
+        ft.commit();
+        Toast.makeText(getApplicationContext(), "Hello", Toast.LENGTH_LONG).show();
+//        startUpActivity.startAnimation();
+        new Controller();
     }
     
     
@@ -40,7 +52,7 @@ public class MainActivity extends Activity {
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000,
-                                               10, locationListener);
+                10, locationListener);
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
         criteria.setAltitudeRequired(false);
@@ -51,8 +63,9 @@ public class MainActivity extends Activity {
         location = locationManager.getLastKnownLocation(provider);
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapFragment);
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapLayout);
         mapFragment.getMapAsync(new OMRC());
+
         
     }
     
@@ -63,7 +76,8 @@ public class MainActivity extends Activity {
         }
     }
     
-    /** private void addMarker() {
+    /**
+     private void addMarker() {
      MarkerOptions mo = new MarkerOptions().position(latLng).title(member);
      map.addMarker(mo);
      

@@ -1,31 +1,22 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:id="@+id/activity_main">
     
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:id="@+id/bannerLayout">
-        
-        <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TEST"
-        android:id="@+id/textView"
-        android:textSize="34sp" />
+
     </LinearLayout>
     
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/bannerLayout">
-        
-        <fragment
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:name="com.google.android.gms.maps.MapFragment"
-        android:id="@+id/mapFragment" />
+        android:layout_below="@id/bannerLayout"
+        android:id="@+id/mapLayout">
+
     </RelativeLayout>
 </RelativeLayout>
