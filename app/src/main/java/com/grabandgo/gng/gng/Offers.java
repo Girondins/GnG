@@ -8,6 +8,7 @@ import java.io.Serializable;
  * Created by alexander on 2016-04-13.
  */
 public class Offers implements Serializable{
+    private static final long serialVersionUID = -955916968626545605L;
     private int duration;
     private String reduction;
     private String description;

@@ -3,12 +3,14 @@ package com.grabandgo.gng.gng;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.LinkedList;
 
 /**
  * Created by alexander on 2016-04-13.
  */
 public class Controller {
 
+    private LinkedList<Restaurant> restaurants;
     private Client client;
     private MainActivity main;
 
@@ -17,7 +19,7 @@ public class Controller {
         this.main = main;
         try {
             Log.d("Connecting","client");
-            client = new Client("10.2.2.10",3000,this);
+            client = new Client("192.168.0.103",3000,this);
             client.enableConnect();
         } catch (IOException e) {
             System.err.println(e);
@@ -28,12 +30,17 @@ public class Controller {
         client.request("getRestaurants");
     }
 
-    public void testRequest(String information){
-        Log.d("TEST",information + "J");
-        main.addMarker(information);
-        Log.d("addmark",information);
-
+    public void setRestaurants(LinkedList<Restaurant> restaurants){
+        this.restaurants = restaurants;
+        initiateRestaurants();
     }
+
+    public void initiateRestaurants(){
+        for(int i=0; i<restaurants.size();i++){
+            main.addMarker(restaurants.get(i));
+        }
+    }
+
 
 
 }

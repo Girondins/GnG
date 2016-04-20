@@ -6,6 +6,7 @@ import java.io.Serializable;
  * Created by alexander on 2016-04-13.
  */
 public class OpenHours implements Serializable{
+    private static final long serialVersionUID = 7817126295918161086L;
     private Day monday, tuesday, wednesday, thursday, friday, saturday, sunday;
 
     public Day getMonday() {

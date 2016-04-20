@@ -12,6 +12,10 @@ import java.util.LinkedList;
  */
 public class Restaurant implements Serializable{
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -1979797941331058982L;
     private String name;
     private String address;
     private String number;
@@ -29,7 +33,8 @@ public class Restaurant implements Serializable{
     private LinkedList<Offers> offerList;
     private LinkedList<String> allergi;
 
-    private LatLng restaurantLocation;
+    private double latitude;
+    private double longitude;
 
     private OpenHours openHours;
 
@@ -85,8 +90,12 @@ public class Restaurant implements Serializable{
         this.allergi = allergi;
     }
 
-    public void setRestaurantLocation(LatLng restaurantLocation) {
-        this.restaurantLocation = restaurantLocation;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude){
+        this.longitude = longitude;
     }
 
     public void setOpenHours(OpenHours openHours) {
@@ -145,8 +154,12 @@ public class Restaurant implements Serializable{
         return allergi;
     }
 
-    public LatLng getRestaurantLocation() {
-        return restaurantLocation;
+    public double getlatitude() {
+        return this.latitude;
+    }
+
+    public double getLongitude(){
+        return this.longitude;
     }
 
     public OpenHours getOpenHours() {

@@ -87,24 +87,13 @@ public class MainActivity extends Activity implements GoogleMap.OnMarkerClickLis
         @Override
         public void onMapReady(GoogleMap googleMap) {
             map = googleMap;
-
-            Log.d("GnG", "Map Ready");
-
-         //   customMarker();
-
-            latitude = 56.1;
-            longitude = 13.2;
-
-            map.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
-
-            );
             cont.getRestaurants();
         }
     }
 
-    public void addMarker(String lat){
+    public void addMarker(Restaurant rest){
 
-       Update up =  new Update(lat);
+       AddRestaurant up =  new AddRestaurant(rest);
         runOnUiThread(up);
 
 
@@ -205,20 +194,17 @@ public class MainActivity extends Activity implements GoogleMap.OnMarkerClickLis
     }
 
 
-    private class Update implements Runnable{
-        private String lat;
+    private class AddRestaurant implements Runnable{
+        private Restaurant rest;
 
-        public Update(String lat){
-            this.lat = lat;
+        public AddRestaurant(Restaurant rest){
+            this.rest = rest;
         }
 
         @Override
         public void run() {
-            latitude = Double.parseDouble(lat);
+            map.addMarker(new MarkerOptions().position(new LatLng(rest.getlatitude(),rest.getLongitude())).title(rest.getName()));
 
-            Log.d("ADDING MARKER", latitude + "");
-            map.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
-            );
         }
     }
 

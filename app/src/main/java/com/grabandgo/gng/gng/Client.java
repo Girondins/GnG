@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 
 /**
  * Created by alexander on 2016-04-13.
@@ -16,7 +17,7 @@ public class Client extends Thread{
     private ExecuteThread exThread;
     private Socket socket;
     private ObjectOutputStream oos;
-    private ObjectInputStream ois;
+    private HackedInputStream ois;
     private Receive receiver;
     private String ip;
     private int port;
@@ -63,7 +64,7 @@ public class Client extends Thread{
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 oos.flush();
                 Log.d("reciver.start", "start");
-                ois = new ObjectInputStream(socket.getInputStream());
+                ois = new HackedInputStream(socket.getInputStream());
                 receiver = new Receive();
                 receiver.start();
                 Log.d("reciver.start", "start");
@@ -121,11 +122,10 @@ public class Client extends Thread{
             try {
                 while (receiver != null) {
                    obj = ois.readObject();
-                    cont.testRequest((String)obj);
-                    if(obj instanceof String){
-                        information = (String) obj;
-                        cont.testRequest(information);
-                        Log.d("Readeee", information);
+                    Log.d("Recieving",obj.toString());
+                    if(obj instanceof LinkedList){
+                        Log.d("setting","set");
+                        cont.setRestaurants((LinkedList)obj);
 
                     }
                 }
