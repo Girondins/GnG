@@ -23,13 +23,16 @@ public class Client extends Thread{
     private Thread thread = new Thread(this);
     private InetAddress address;
     private Buffer<Object> receiverBuff;
+    private Controller cont;
 
-    public Client(String ip, int port) throws UnknownHostException, IOException {
+    public Client(String ip, int port,Controller cont) throws UnknownHostException, IOException {
         this.ip = ip;
         this.port = port;
         exThread = new ExecuteThread();
         thread.start();
+        exThread.start();
         receiverBuff = new Buffer<Object>();
+        this.cont = cont;
     }
 
 
@@ -65,7 +68,7 @@ public class Client extends Thread{
                 receiver.start();
                 Log.d("reciver.start", "start");
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println(e);
             }
         }
     }
@@ -97,7 +100,7 @@ public class Client extends Thread{
         public void run() {
             try{
                 if(request!=null){
-                    oos.writeUTF(request.toString());
+                    oos.writeObject(request.toString());
                     Log.d("SENDTASK", request.toString());
                     oos.flush();
                 }
@@ -114,9 +117,17 @@ public class Client extends Thread{
     private class Receive extends Thread {
         public void run() {
             String information;
+            Object obj;
             try {
                 while (receiver != null) {
+                   obj = ois.readObject();
+                    cont.testRequest((String)obj);
+                    if(obj instanceof String){
+                        information = (String) obj;
+                        cont.testRequest(information);
+                        Log.d("Readeee", information);
 
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();

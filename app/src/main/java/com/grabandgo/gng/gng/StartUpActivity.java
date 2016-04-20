@@ -46,6 +46,7 @@ public class StartUpActivity extends AppCompatActivity {
 
         pathOrLogo = ValidationUtil.hasPath(mConfigSplash);
         initUI(pathOrLogo);
+
     }
 
     public void initUI(int flag) {

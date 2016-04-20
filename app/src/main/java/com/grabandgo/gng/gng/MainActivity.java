@@ -51,6 +51,7 @@ public class MainActivity extends Activity implements GoogleMap.OnMarkerClickLis
     private String provider;
     private MapFragment mapFragment;
     private GoogleMap map;
+    private Controller cont = new Controller(this);
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,14 +90,24 @@ public class MainActivity extends Activity implements GoogleMap.OnMarkerClickLis
 
             Log.d("GnG", "Map Ready");
 
-            customMarker();
+         //   customMarker();
 
             latitude = 56.1;
             longitude = 13.2;
 
             map.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+
             );
+            cont.getRestaurants();
         }
+    }
+
+    public void addMarker(String lat){
+
+       Update up =  new Update(lat);
+        runOnUiThread(up);
+
+
     }
 
     @Override
@@ -192,5 +203,24 @@ public class MainActivity extends Activity implements GoogleMap.OnMarkerClickLis
         map.moveCamera(center);
 
     }
+
+
+    private class Update implements Runnable{
+        private String lat;
+
+        public Update(String lat){
+            this.lat = lat;
+        }
+
+        @Override
+        public void run() {
+            latitude = Double.parseDouble(lat);
+
+            Log.d("ADDING MARKER", latitude + "");
+            map.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+            );
+        }
+    }
+
 
 }

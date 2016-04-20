@@ -1,5 +1,7 @@
 package com.grabandgo.gng.gng;
 
+import android.util.Log;
+
 import java.io.IOException;
 
 /**
@@ -8,14 +10,29 @@ import java.io.IOException;
 public class Controller {
 
     private Client client;
+    private MainActivity main;
 
-    public Controller(){
+
+    public Controller(MainActivity main){
+        this.main = main;
         try {
-            client = new Client("10.101.2.48",9000);
+            Log.d("Connecting","client");
+            client = new Client("10.2.2.10",3000,this);
             client.enableConnect();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e);
         }
+    }
+
+    public void getRestaurants(){
+        client.request("getRestaurants");
+    }
+
+    public void testRequest(String information){
+        Log.d("TEST",information + "J");
+        main.addMarker(information);
+        Log.d("addmark",information);
+
     }
 
 
