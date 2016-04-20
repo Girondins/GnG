@@ -2,14 +2,19 @@ package com.grabandgo.gng.gng;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.os.Bundle;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
 /**
@@ -22,14 +27,24 @@ public class MainActivity extends Activity {
     private double latitude;
     private double longitude;
     private String provider;
+    private MapFragment mapFragment;
     private GoogleMap map;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //initMap();
+        //  initMap();
+        StartUpActivity startUpActivity = new StartUpActivity();
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.activity_main, startUpActivity);
+        ft.commit();
+        Toast.makeText(getApplicationContext(), "Hello", Toast.LENGTH_LONG).show();
+//        startUpActivity.startAnimation();
+        new Controller();
     }
-
+    
+    
     public void initMap() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationList();
@@ -48,6 +63,9 @@ public class MainActivity extends Activity {
         location = locationManager.getLastKnownLocation(provider);
         latitude = location.getLatitude();
         longitude = location.getLongitude();
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapLayout);
+        mapFragment.getMapAsync(new OMRC());
+
         
     }
     

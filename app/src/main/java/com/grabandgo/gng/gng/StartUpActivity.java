@@ -1,17 +1,17 @@
 package com.grabandgo.gng.gng;
 
-import android.content.Intent;
+import android.app.Fragment;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.github.jorgecastillo.FillableLoader;
@@ -28,20 +28,35 @@ import com.viksaa.sssplash.lib.utils.ValidationUtil;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
 
-public class StartUpActivity extends AppCompatActivity {
+public class StartUpActivity extends Fragment {
 
     private RelativeLayout mRlReveal;
     private ImageView mImgLogo;
     private AppCompatTextView mTxtTitle;
     private FillableLoader mPathLogo;
     private FrameLayout mFl;
+
     private ConfigSplash mConfigSplash;
     private boolean hasAnimationStarted = false;
     private int pathOrLogo = 0;
+    private View view;
+    private MainActivity mainActivity;
 
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        view = inflater.inflate(com.viksaa.sssplash.lib.R.layout.activity_main_lib, container, false);
+        mainActivity = (MainActivity)getActivity();
+        mConfigSplash = new ConfigSplash();
+        initSplash(mConfigSplash);
+
+        pathOrLogo = ValidationUtil.hasPath(mConfigSplash);
+        initUI(pathOrLogo);
+
+        return view;
+    }
+
+    public void startAnimation(){
         mConfigSplash = new ConfigSplash();
         initSplash(mConfigSplash);
 
@@ -49,32 +64,39 @@ public class StartUpActivity extends AppCompatActivity {
         initUI(pathOrLogo);
     }
 
-    public void initUI(int flag) {
-        setContentView(com.viksaa.sssplash.lib.R.layout.activity_main_lib);
+    public StartUpActivity(){
 
-        mRlReveal = (RelativeLayout) findViewById(com.viksaa.sssplash.lib.R.id.rlColor);
-        mTxtTitle = (AppCompatTextView) findViewById(com.viksaa.sssplash.lib.R.id.txtTitle);
+    }
+
+    public void initUI(int flag) {
+
+        mRlReveal = (RelativeLayout) view.findViewById(com.viksaa.sssplash.lib.R.id.rlColor);
+        mTxtTitle = (AppCompatTextView) view.findViewById(com.viksaa.sssplash.lib.R.id.txtTitle);
+
 
         switch (flag) {
             case Flags.WITH_PATH:
-                mFl = (FrameLayout) findViewById(com.viksaa.sssplash.lib.R.id.flCentral);
+                mFl = (FrameLayout) view.findViewById(com.viksaa.sssplash.lib.R.id.flCentral);
                 initPathAnimation();
                 break;
             case Flags.WITH_LOGO:
-                mImgLogo = (ImageView) findViewById(com.viksaa.sssplash.lib.R.id.imgLogo);
+                mImgLogo = (ImageView) view.findViewById(com.viksaa.sssplash.lib.R.id.imgLogo);
                 mImgLogo.setImageResource(mConfigSplash.getLogoSplash());
                 break;
             default:
                 break;
+
         }
+
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
+        view.onWindowFocusChanged(hasFocus);
         if (hasFocus && !hasAnimationStarted) {
             startCircularReveal();
         }
     }
+
 
     public void initPathAnimation() {
         int viewSize = getResources().getDimensionPixelSize(com.viksaa.sssplash.lib.R.dimen.fourthSampleViewSize);
@@ -95,15 +117,19 @@ public class StartUpActivity extends AppCompatActivity {
                 .clippingTransform(new PlainClippingTransform())
                 .build();
         mPathLogo.setOnStateChangeListener(new OnStateChangeListener() {
+            @Override
             public void onStateChange(int i) {
                 if (i == State.FINISHED) {
                     startTextAnimation();
                 }
             }
         });
+
     }
 
+
     public void startCircularReveal() {
+
         // get the final radius for the clipping circle
         int finalRadius = Math.max(mRlReveal.getWidth(), mRlReveal.getHeight()) + mRlReveal.getHeight() / 2;
         //bottom or top
@@ -116,16 +142,19 @@ public class StartUpActivity extends AppCompatActivity {
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.setDuration(mConfigSplash.getAnimCircularRevealDuration());
         animator.addListener(new SupportAnimator.AnimatorListener() {
-
+            @Override
             public void onAnimationStart() {
             }
 
+            @Override
             public void onAnimationCancel() {
             }
 
+            @Override
             public void onAnimationRepeat() {
             }
 
+            @Override
             public void onAnimationEnd() {
 
                 if (pathOrLogo == Flags.WITH_PATH) {
@@ -139,24 +168,34 @@ public class StartUpActivity extends AppCompatActivity {
         hasAnimationStarted = true;
     }
 
+
     public void startLogoAnimation() {
         mImgLogo.setVisibility(View.VISIBLE);
         mImgLogo.setImageResource(mConfigSplash.getLogoSplash());
 
         YoYo.with(mConfigSplash.getAnimLogoSplashTechnique()).withListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
 
-            public void onAnimationStart(Animator animation) {}
+            }
 
+            @Override
             public void onAnimationEnd(Animator animation) {
                 startTextAnimation();
             }
 
-            public void onAnimationCancel(Animator animation) {}
+            @Override
+            public void onAnimationCancel(Animator animation) {
 
-            public void onAnimationRepeat(Animator animation) {}
+            }
 
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
         }).duration(mConfigSplash.getAnimLogoSplashDuration()).playOn(mImgLogo);
     }
+
 
     public void startTextAnimation() {
 
@@ -173,27 +212,35 @@ public class StartUpActivity extends AppCompatActivity {
         mTxtTitle.setVisibility(View.VISIBLE);
 
         YoYo.with(mConfigSplash.getAnimTitleTechnique()).withListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
 
-            public void onAnimationStart(Animator animation) {}
-
+            @Override
             public void onAnimationEnd(Animator animation) {
                 animationsFinished();
             }
 
-            public void onAnimationCancel(Animator animation) {}
+            @Override
+            public void onAnimationCancel(Animator animation) {
 
-            public void onAnimationRepeat(Animator animation) {}
+            }
 
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
         }).duration(mConfigSplash.getAnimTitleDuration()).playOn(mTxtTitle);
     }
 
+
     public void setFont(String font) {
-        Typeface type = Typeface.createFromAsset(getAssets(), font);
+        Typeface type = Typeface.createFromAsset(mainActivity.getAssets(), font);
         mTxtTitle.setTypeface(type);
     }
 
     public void initSplash(ConfigSplash configSplash){
-        /* you don't have to override every property */
+                    /* you don't have to override every property */
 
         //Customize Circular Reveal
         configSplash.setBackgroundColor(R.color.grabNgo); //any color you want form colors.xml
@@ -204,9 +251,10 @@ public class StartUpActivity extends AppCompatActivity {
         //Choose LOGO OR PATH; if you don't provide String value for path it's logo by default
 
         //Customize Logo
-        configSplash.setLogoSplash(R.drawable.start_icon_temp); //or any other drawable
+        configSplash.setLogoSplash(R.mipmap.ic_launcher); //or any other drawable
         configSplash.setAnimLogoSplashDuration(2000); //int ms
         configSplash.setAnimLogoSplashTechnique(Techniques.Bounce); //choose one form Techniques (ref: https://github.com/daimajia/AndroidViewAnimations)
+
 
         //Customize Path
         //configSplash.setPathSplash(); //set path String
@@ -218,8 +266,9 @@ public class StartUpActivity extends AppCompatActivity {
         configSplash.setAnimPathFillingDuration(3000);
         configSplash.setPathSplashFillColor(R.color.white); //path object filling color
 
+
         //Customize Title
-        configSplash.setTitleSplash("Money, bitches!");
+        configSplash.setTitleSplash("Grab'n'Go");
         configSplash.setTitleTextColor(R.color.white);
         configSplash.setTitleTextSize(70f); //float value
         configSplash.setAnimTitleDuration(3000);
@@ -228,8 +277,5 @@ public class StartUpActivity extends AppCompatActivity {
     }
 
     public void animationsFinished(){
-        MainActivity mainActivity = new MainActivity();
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
     }
 }

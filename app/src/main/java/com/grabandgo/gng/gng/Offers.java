@@ -2,10 +2,12 @@ package com.grabandgo.gng.gng;
 
 import android.widget.ImageView;
 
+import java.io.Serializable;
+
 /**
  * Created by alexander on 2016-04-13.
  */
-public class Offers {
+public class Offers implements Serializable{
     private int duration;
     private String reduction;
     private String description;
