@@ -29,9 +29,8 @@ public class Restaurant implements Serializable{
     private ImageView restaurantPic;
     private ImageView logo;
 
-    private LinkedList<String> category;
+    private LinkedList<String> restaurantFilter;
     private LinkedList<Offers> offerList;
-    private LinkedList<String> allergi;
 
     private double latitude;
     private double longitude;
@@ -78,16 +77,12 @@ public class Restaurant implements Serializable{
         this.logo = logo;
     }
 
-    public void setCategory(LinkedList<String> category) {
-        this.category = category;
+    public void setCategory(LinkedList<String> restaurantFilter) {
+        this.restaurantFilter = restaurantFilter;
     }
 
     public void setOfferList(LinkedList<Offers> offerList) {
         this.offerList = offerList;
-    }
-
-    public void setAllergi(LinkedList<String> allergi) {
-        this.allergi = allergi;
     }
 
     public void setLatitude(double latitude) {
@@ -142,17 +137,14 @@ public class Restaurant implements Serializable{
         return logo;
     }
 
-    public LinkedList<String> getCategory() {
-        return category;
+    public LinkedList<String> getRestaurantFilter() {
+        return restaurantFilter;
     }
 
     public LinkedList<Offers> getOfferList() {
         return offerList;
     }
 
-    public LinkedList<String> getAllergi() {
-        return allergi;
-    }
 
     public double getlatitude() {
         return this.latitude;

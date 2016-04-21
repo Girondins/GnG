@@ -19,7 +19,7 @@ public class Controller {
         this.main = main;
         try {
             Log.d("Connecting","client");
-            client = new Client("192.168.0.103",3000,this);
+            client = new Client("10.2.2.10",3000,this);
             client.enableConnect();
         } catch (IOException e) {
             System.err.println(e);
