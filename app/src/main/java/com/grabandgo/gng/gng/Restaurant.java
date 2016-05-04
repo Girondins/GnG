@@ -2,19 +2,14 @@ package com.grabandgo.gng.gng;
 
 import android.widget.ImageView;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.Serializable;
 import java.util.LinkedList;
 
 /**
- * Created by alexander on 2016-04-13.
+ * Restaurant object. With name, address, phone number, email, city ,info, ID and rating.
  */
-public class Restaurant implements Serializable{
+public class Restaurant implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -1979797941331058982L;
     private String name;
     private String address;
@@ -26,10 +21,10 @@ public class Restaurant implements Serializable{
     private int ID;
     private int rating;
 
-    private ImageView restaurantPic;
-    private ImageView logo;
+    private ImageHolder restaurantPic = new ImageHolder();
+    private ImageHolder logo = new ImageHolder();
 
-    private LinkedList<String> restaurantFilter;
+    private Filter restaurantFilter;
     private LinkedList<Offers> offerList;
 
     private double latitude;
@@ -37,65 +32,7 @@ public class Restaurant implements Serializable{
 
     private OpenHours openHours;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
-    }
-
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    public void setRestaurantPic(ImageView restaurantPic) {
-        this.restaurantPic = restaurantPic;
-    }
-
-    public void setLogo(ImageView logo) {
-        this.logo = logo;
-    }
-
-    public void setCategory(LinkedList<String> restaurantFilter) {
-        this.restaurantFilter = restaurantFilter;
-    }
-
-    public void setOfferList(LinkedList<Offers> offerList) {
-        this.offerList = offerList;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public void setLongitude(double longitude){
-        this.longitude = longitude;
-    }
-
-    public void setOpenHours(OpenHours openHours) {
-        this.openHours = openHours;
-    }
+    public void Restaurant(){}
 
     public String getName() {
         return name;
@@ -105,7 +42,7 @@ public class Restaurant implements Serializable{
         return address;
     }
 
-    public String getNumber() {
+    public String getPhoneNumber() {
         return number;
     }
 
@@ -130,14 +67,14 @@ public class Restaurant implements Serializable{
     }
 
     public ImageView getRestaurantPic() {
-        return restaurantPic;
+        return restaurantPic.getImage();
     }
 
     public ImageView getLogo() {
-        return logo;
+        return logo.getImage();
     }
 
-    public LinkedList<String> getRestaurantFilter() {
+    public Filter getRestaurantFilter() {
         return restaurantFilter;
     }
 
@@ -146,15 +83,91 @@ public class Restaurant implements Serializable{
     }
 
 
-    public double getlatitude() {
+    public double getLatitude() {
         return this.latitude;
     }
 
-    public double getLongitude(){
+    public double getLongitude() {
         return this.longitude;
     }
 
     public OpenHours getOpenHours() {
         return openHours;
+    }
+
+    public void setLogoSource(String sourcePath) {
+        logo.setDBSource(sourcePath);
+    }
+
+    public String getLogoSource() {
+        return logo.getDBSource();
+    }
+
+    public void setImageSource(String sourcePath) {
+        restaurantPic.setDBSource(sourcePath);
+    }
+
+    public String getImageSource() {
+        return restaurantPic.getDBSource();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setPhoneNumber(String number) {
+        this.number = number;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public void setRestaurantPic(ImageView restaurantPic) {
+        this.restaurantPic.setImage(restaurantPic);
+    }
+
+    public void setLogo(ImageView logo) {
+        this.logo.setImage(logo);
+    }
+
+    public void setRestaurantFilter(Filter restaurantFilter) {
+        this.restaurantFilter = restaurantFilter;
+    }
+
+    public void setOfferList(LinkedList<Offers> offerList) {
+        this.offerList = offerList;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setOpenHours(OpenHours openHours) {
+        this.openHours = openHours;
     }
 }

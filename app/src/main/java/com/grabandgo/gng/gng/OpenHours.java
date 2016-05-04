@@ -3,11 +3,11 @@ package com.grabandgo.gng.gng;
 import java.io.Serializable;
 
 /**
- * Created by alexander on 2016-04-13.
+ * OpenHours object. With different days and open-hours for each day.
  */
-public class OpenHours implements Serializable{
+public class OpenHours implements Serializable {
     private static final long serialVersionUID = 7817126295918161086L;
-    private Day monday, tuesday, wednesday, thursday, friday, saturday, sunday;
+    private Day monday = new Day(), tuesday = new Day(), wednesday = new Day(), thursday = new Day(), friday = new Day(), saturday = new Day(), sunday = new Day();
 
     public Day getMonday() {
         return monday;

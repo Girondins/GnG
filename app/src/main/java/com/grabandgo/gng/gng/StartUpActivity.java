@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.github.jorgecastillo.FillableLoader;
@@ -27,6 +29,9 @@ import com.viksaa.sssplash.lib.utils.ValidationUtil;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
 
+/**
+ * StartUpActivity, splash screen.
+ */
 public class StartUpActivity extends AppCompatActivity {
 
     private RelativeLayout mRlReveal;
@@ -46,7 +51,6 @@ public class StartUpActivity extends AppCompatActivity {
 
         pathOrLogo = ValidationUtil.hasPath(mConfigSplash);
         initUI(pathOrLogo);
-
     }
 
     public void initUI(int flag) {
@@ -145,21 +149,23 @@ public class StartUpActivity extends AppCompatActivity {
 
         YoYo.with(mConfigSplash.getAnimLogoSplashTechnique()).withListener(new Animator.AnimatorListener() {
 
-            public void onAnimationStart(Animator animation) {}
+            public void onAnimationStart(Animator animation) {
+            }
 
             public void onAnimationEnd(Animator animation) {
                 startTextAnimation();
             }
 
-            public void onAnimationCancel(Animator animation) {}
+            public void onAnimationCancel(Animator animation) {
+            }
 
-            public void onAnimationRepeat(Animator animation) {}
+            public void onAnimationRepeat(Animator animation) {
+            }
 
         }).duration(mConfigSplash.getAnimLogoSplashDuration()).playOn(mImgLogo);
     }
 
     public void startTextAnimation() {
-
         mTxtTitle.setText(mConfigSplash.getTitleSplash());
         mTxtTitle.setTextSize(mConfigSplash.getTitleTextSize());
         mTxtTitle.setTextColor(getResources().getColor(mConfigSplash.getTitleTextColor()));
@@ -174,15 +180,18 @@ public class StartUpActivity extends AppCompatActivity {
 
         YoYo.with(mConfigSplash.getAnimTitleTechnique()).withListener(new Animator.AnimatorListener() {
 
-            public void onAnimationStart(Animator animation) {}
+            public void onAnimationStart(Animator animation) {
+            }
 
             public void onAnimationEnd(Animator animation) {
                 animationsFinished();
             }
 
-            public void onAnimationCancel(Animator animation) {}
+            public void onAnimationCancel(Animator animation) {
+            }
 
-            public void onAnimationRepeat(Animator animation) {}
+            public void onAnimationRepeat(Animator animation) {
+            }
 
         }).duration(mConfigSplash.getAnimTitleDuration()).playOn(mTxtTitle);
     }
@@ -192,44 +201,44 @@ public class StartUpActivity extends AppCompatActivity {
         mTxtTitle.setTypeface(type);
     }
 
-    public void initSplash(ConfigSplash configSplash){
+    public void initSplash(ConfigSplash configSplash) {
         /* you don't have to override every property */
 
         //Customize Circular Reveal
         configSplash.setBackgroundColor(R.color.grabNgo); //any color you want form colors.xml
-        configSplash.setAnimCircularRevealDuration(2000); //int ms
-        configSplash.setRevealFlagX(Flags.REVEAL_RIGHT);  //or Flags.REVEAL_LEFT
-        configSplash.setRevealFlagY(Flags.REVEAL_BOTTOM); //or Flags.REVEAL_TOP
+        configSplash.setAnimCircularRevealDuration(0); //int ms;
+        //configSplash.setRevealFlagX(Flags.REVEAL_RIGHT);  //or Flags.REVEAL_LEFT
+        //configSplash.setRevealFlagY(Flags.REVEAL_TOP); //or Flags.REVEAL_TOP
 
         //Choose LOGO OR PATH; if you don't provide String value for path it's logo by default
 
         //Customize Logo
-        configSplash.setLogoSplash(R.drawable.start_icon_temp); //or any other drawable
-        configSplash.setAnimLogoSplashDuration(2000); //int ms
-        configSplash.setAnimLogoSplashTechnique(Techniques.Bounce); //choose one form Techniques (ref: https://github.com/daimajia/AndroidViewAnimations)
+        configSplash.setLogoSplash(R.drawable.startupicon); //or any other drawable
+        configSplash.setAnimLogoSplashDuration(100); //int ms
+        //configSplash.setAnimLogoSplashTechnique(Techniques.Bounce); //choose one form Techniques (ref: https://github.com/daimajia/AndroidViewAnimations)
 
         //Customize Path
         //configSplash.setPathSplash(); //set path String
         configSplash.setOriginalHeight(400); //in relation to your svg (path) resource
         configSplash.setOriginalWidth(400); //in relation to your svg (path) resource
-        configSplash.setAnimPathStrokeDrawingDuration(3000);
+        configSplash.setAnimPathStrokeDrawingDuration(100);
         configSplash.setPathSplashStrokeSize(3); //I advise value be <5
         configSplash.setPathSplashStrokeColor(R.color.white); //any color you want form colors.xml
-        configSplash.setAnimPathFillingDuration(3000);
+        configSplash.setAnimPathFillingDuration(100);
         configSplash.setPathSplashFillColor(R.color.white); //path object filling color
 
         //Customize Title
-        configSplash.setTitleSplash("Money, bitches!");
+        configSplash.setTitleSplash("Grab n'Go");
         configSplash.setTitleTextColor(R.color.white);
         configSplash.setTitleTextSize(70f); //float value
-        configSplash.setAnimTitleDuration(3000);
+        configSplash.setAnimTitleDuration(100);
         configSplash.setAnimTitleTechnique(Techniques.FlipInX);
         configSplash.setTitleFont("fonts/splash-font.ttf"); //provide string to your font located in assets/fonts/
     }
 
-    public void animationsFinished(){
-        MainActivity mainActivity = new MainActivity();
+    public void animationsFinished() {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+        Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(getApplicationContext(), android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+        startActivity(intent, bundle);
     }
 }

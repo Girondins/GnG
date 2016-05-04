@@ -5,32 +5,22 @@ import android.widget.ImageView;
 import java.io.Serializable;
 
 /**
- * Created by alexander on 2016-04-13.
+ * Offers object. With duration, description, type and images.
  */
-public class Offers implements Serializable{
+public class Offers implements Serializable {
     private static final long serialVersionUID = -955916968626545605L;
     private int duration;
-    private String reduction;
+    private int reduction;
     private String description;
     private String type;
-    private ImageView imageOffer;
-
-
-
-    public Offers(int duration, String reduction, String description, String type, ImageView imageOffer){
-        this.duration = duration;
-        this.reduction = reduction;
-        this.description = description;
-        this.type = type;
-        this.imageOffer = imageOffer;
-
-    }
+    private ImageHolder imageOffer = new ImageHolder();
+    private int restID;
 
     public void setDuration(int duration) {
         this.duration = duration;
     }
 
-    public void setReduction(String reduction) {
+    public void setReduction(int reduction) {
         this.reduction = reduction;
     }
 
@@ -39,7 +29,7 @@ public class Offers implements Serializable{
     }
 
     public void setImageOffer(ImageView imageOffer) {
-        this.imageOffer = imageOffer;
+        this.imageOffer.setImage(imageOffer);
     }
 
     public void setType(String type) {
@@ -50,7 +40,7 @@ public class Offers implements Serializable{
         return duration;
     }
 
-    public String getReduction() {
+    public int getReduction() {
         return reduction;
     }
 
@@ -59,10 +49,26 @@ public class Offers implements Serializable{
     }
 
     public ImageView getImageOffer() {
-        return imageOffer;
+        return imageOffer.getImage();
     }
 
     public String getType() {
         return type;
+    }
+
+    public void setImagePath(String sourcePath) {
+        imageOffer.setDBSource(sourcePath);
+    }
+
+    public String getImagePath() {
+        return imageOffer.getDBSource();
+    }
+
+    public void setRestID(int id) {
+        this.restID = id;
+    }
+
+    public int getRestID() {
+        return this.restID;
     }
 }

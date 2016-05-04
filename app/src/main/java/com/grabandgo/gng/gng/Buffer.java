@@ -3,7 +3,8 @@ package com.grabandgo.gng.gng;
 import java.util.LinkedList;
 
 /**
- * Created by Girondins on 05/10/15.
+ * Buffer class.
+ * @param <T> - Generic
  */
 public class Buffer<T> {
     private LinkedList<T> buffer = new LinkedList<T>();
@@ -14,7 +15,7 @@ public class Buffer<T> {
     }
 
     public synchronized T get() throws InterruptedException {
-        while(buffer.isEmpty()) {
+        while (buffer.isEmpty()) {
             wait();
         }
         return buffer.removeFirst();

@@ -11,9 +11,9 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 
 /**
- * Created by alexander on 2016-04-13.
+ * Client class.
  */
-public class Client extends Thread{
+public class Client extends Thread {
     private ExecuteThread exThread;
     private Socket socket;
     private ObjectOutputStream oos;
@@ -26,7 +26,7 @@ public class Client extends Thread{
     private Buffer<Object> receiverBuff;
     private Controller cont;
 
-    public Client(String ip, int port,Controller cont) throws UnknownHostException, IOException {
+    public Client(String ip, int port, Controller cont) throws UnknownHostException, IOException {
         this.ip = ip;
         this.port = port;
         exThread = new ExecuteThread();
@@ -37,15 +37,15 @@ public class Client extends Thread{
     }
 
 
-    public void enableConnect(){
+    public void enableConnect() {
         exThread.execute(new Connect());
     }
 
-    public void disconnect(){
+    public void disconnect() {
         exThread.execute(new Disconnect());
     }
 
-    public void request(String request){
+    public void request(String request) {
         exThread.execute(new SendRequest(request));
     }
 
@@ -84,23 +84,23 @@ public class Client extends Thread{
                 if (socket != null)
                     socket.close();
                 exThread.stop();
-            } catch(IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private class SendRequest implements Runnable{
+    private class SendRequest implements Runnable {
         String request;
 
-        public SendRequest(String request){
+        public SendRequest(String request) {
             this.request = request;
         }
 
         @Override
         public void run() {
-            try{
-                if(request!=null){
+            try {
+                if (request != null) {
                     oos.writeObject(request.toString());
                     Log.d("SENDTASK", request.toString());
                     oos.flush();
@@ -121,11 +121,11 @@ public class Client extends Thread{
             Object obj;
             try {
                 while (receiver != null) {
-                   obj = ois.readObject();
-                    Log.d("Recieving",obj.toString());
-                    if(obj instanceof LinkedList){
-                        Log.d("setting","set");
-                        cont.setRestaurants((LinkedList)obj);
+                    obj = ois.readObject();
+                    Log.d("Recieving", obj.toString());
+                    if (obj instanceof LinkedList) {
+                        Log.d("setting", "set");
+                        cont.setRestaurants((LinkedList) obj);
 
                     }
                 }

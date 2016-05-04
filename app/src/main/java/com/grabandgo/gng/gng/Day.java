@@ -3,37 +3,29 @@ package com.grabandgo.gng.gng;
 import java.io.Serializable;
 
 /**
- * Created by alexander on 2016-04-13.
+ * Day object.
  */
-public class Day implements Serializable{
+public class Day implements Serializable {
     private static final long serialVersionUID = 3881527782534020428L;
     private String openHours;
     private String closedHours;
 
-
-
-
-
-
-    public Day(){
-
+    public Day() {
     }
 
-
-    public void setOpenHours(String openHours){
+    public void setOpenHours(String openHours) {
         this.openHours = openHours;
-
     }
 
-    public void setClosedHours(String closedHours){
+    public void setClosedHours(String closedHours) {
         this.closedHours = closedHours;
     }
 
-    public String getOpenHours(){
+    public String getOpenHours() {
         return this.openHours;
     }
 
-    public String getClosedHours(){
+    public String getClosedHours() {
         return this.closedHours;
     }
 }
