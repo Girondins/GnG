@@ -1,6 +1,8 @@
 package com.grabandgo.gng.gng;
 
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,6 +11,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Client class.
@@ -25,10 +29,13 @@ public class Client extends Thread {
     private InetAddress address;
     private Buffer<Object> receiverBuff;
     private Controller cont;
+    private MainActivity main;
+    private Timer timer = new Timer();
 
-    public Client(String ip, int port, Controller cont) throws UnknownHostException, IOException {
+    public Client(String ip, int port, Controller cont,MainActivity main) throws UnknownHostException, IOException {
         this.ip = ip;
         this.port = port;
+        this.main = main;
         exThread = new ExecuteThread();
         thread.start();
         exThread.start();
@@ -53,6 +60,10 @@ public class Client extends Thread {
         return receiverBuff.get(); // Modify When Result Is Known aka Ändra sen
     }
 
+    public ObjectOutputStream checkConnection(){
+        return oos;
+    }
+
     private class Connect implements Runnable {
         @Override
         public void run() {
@@ -70,6 +81,9 @@ public class Client extends Thread {
                 Log.d("reciver.start", "start");
             } catch (Exception e) {
                 System.err.println(e);
+                // cont.checkConnection();
+                timer.schedule(new TryConnect(),5000);
+
             }
         }
     }
@@ -135,6 +149,15 @@ public class Client extends Thread {
             }
         }
     }
+
+    private class TryConnect extends TimerTask{
+
+        @Override
+        public void run() {
+            cont.checkConnection();
+        }
+    }
+
 
 
 }

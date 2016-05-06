@@ -1,6 +1,7 @@
 package com.grabandgo.gng.gng;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -24,7 +25,7 @@ public class Controller {
         try {
             Log.d("Connecting", "client");
             filter = new Filter();
-            client = new Client("10.2.11.97", 3000, this);
+            client = new Client("192.168.1.215", 3000, this,main);
             client.enableConnect();
         } catch (IOException e) {
             System.err.println(e);
@@ -50,6 +51,17 @@ public class Controller {
         for (int i = 0; i < restaurants.size(); i++) {
             main.addMarker(restaurants.get(i));
         }
+    }
+
+    public void reconnect(){
+        client.enableConnect();
+    }
+
+    public void checkConnection(){
+        if(client.checkConnection() == null){
+            main.requestReconnect();
+        }else
+            getRestaurants();
     }
 
     private class CheckFilter implements Runnable {

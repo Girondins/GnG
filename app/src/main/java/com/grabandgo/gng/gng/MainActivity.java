@@ -1,5 +1,6 @@
 package com.grabandgo.gng.gng;
 
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Typeface;
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 if (controller != null) {
-                    controller.getRestaurants();
+                    controller.checkConnection();
                 }
 
                 mMap = mapboxMap;
@@ -260,6 +261,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addMarker(Restaurant restaurant) {
-        mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().position(new LatLng(restaurant.getLatitude(), restaurant.getLongitude())).title(String.valueOf(restaurant.getID())));
+        mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().position(new LatLng(restaurant.getLatitude(), restaurant.getLongitude())));
+    }
+
+    public void requestReconnect(){
+        runOnUiThread(new Reconnect(controller));
+    }
+
+    private class Reconnect implements Runnable {
+        private Controller cont;
+
+        public Reconnect(Controller cont){
+            this.cont = cont;
+        }
+
+        @Override
+        public void run() {
+            Toast toast = Toast.makeText(getApplicationContext(),"Failed to connect to server \n  \t Trying to reconnect",Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+            cont.reconnect();
+        }
+
     }
 }
