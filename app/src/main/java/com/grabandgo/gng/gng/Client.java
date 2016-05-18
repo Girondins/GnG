@@ -32,7 +32,7 @@ public class Client extends Thread {
     private MainActivity main;
     private Timer timer = new Timer();
 
-    public Client(String ip, int port, Controller cont) throws UnknownHostException, IOException {
+    public Client(String ip, int port, Controller cont,MainActivity main) throws UnknownHostException, IOException {
         this.ip = ip;
         this.port = port;
         this.main = main;
