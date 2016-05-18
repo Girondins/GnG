@@ -79,6 +79,7 @@ public class Client extends Thread {
                 receiver = new Receive();
                 receiver.start();
                 Log.d("reciver.start", "start");
+                cont.getRestaurants();
             } catch (Exception e) {
                 System.err.println(e);
                 // cont.checkConnection();
