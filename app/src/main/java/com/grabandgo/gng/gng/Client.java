@@ -15,7 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Client class. hjgvjytvjghv
+ * Client class. that's it folks
  */
 public class Client extends Thread {
     private ExecuteThread exThread;
