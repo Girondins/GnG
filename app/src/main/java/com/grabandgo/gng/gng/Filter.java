@@ -67,17 +67,17 @@ public class Filter implements Serializable {
         return filters.get(i).getStatus();
     }
 
-    public void setCategoryTrue(String category) {
+    public void setSubCategoryTrue(String subCategory) {
         for (int i = 0; i < filters.size(); i++) {
-            if (filters.get(i).equals(category)) {
+            if (filters.get(i).getSubCategory().equals(subCategory)) {
                 filters.get(i).setStatus(true);
             }
         }
     }
 
-    public void setCategoryFalse(String category) {
+    public void setSubCategoryFalse(String category) {
         for (int i = 0; i < filters.size(); i++) {
-            if (filters.get(i).equals(category)) {
+            if (filters.get(i).getSubCategory().equals(category)) {
                 filters.get(i).setStatus(false);
             }
         }

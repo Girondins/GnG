@@ -1,5 +1,6 @@
 package com.grabandgo.gng.gng;
 
+import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import java.io.Serializable;
@@ -7,68 +8,90 @@ import java.io.Serializable;
 /**
  * Offers object. With duration, description, type and images.
  */
-public class Offers implements Serializable {
+public class Offers implements Serializable{
+    /**
+     *
+     */
     private static final long serialVersionUID = -955916968626545605L;
-    private int duration;
-    private int reduction;
+    private String start;
+    private String end;
+    private int discount;
+    private String title;
     private String description;
     private String type;
-    private ImageHolder imageOffer = new ImageHolder();
+    private String whom;
     private int restID;
+    private byte[] imageBytes;
 
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setStart(String start) {
+        this.start = start;
     }
 
-    public void setReduction(int reduction) {
-        this.reduction = reduction;
+    public void setEnd(String end){
+        this.end = end;
+    }
+
+    public void setWhom(String whom){
+        this.whom = whom;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
     }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public void setImageOffer(ImageView imageOffer) {
-        this.imageOffer.setImage(imageOffer);
-    }
-
     public void setType(String type) {
         this.type = type;
     }
 
-    public int getDuration() {
-        return duration;
+    public String getStart() {
+        return this.start;
     }
 
-    public int getReduction() {
-        return reduction;
+    public String getEnd(){
+        return this.end;
+    }
+
+    public String getWhom(){
+        return this.whom;
+    }
+
+    public int getDiscount() {
+        return discount;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public ImageView getImageOffer() {
-        return imageOffer.getImage();
-    }
-
     public String getType() {
         return type;
     }
 
-    public void setImagePath(String sourcePath) {
-        imageOffer.setDBSource(sourcePath);
+    public void setImageBytes(byte[] imagebytes){
+        this.imageBytes = imagebytes;
     }
 
-    public String getImagePath() {
-        return imageOffer.getDBSource();
+    public byte[] getImageBytes(){
+        return imageBytes;
     }
 
-    public void setRestID(int id) {
+    public void setRestID(int id){
         this.restID = id;
     }
 
-    public int getRestID() {
+    public int getRestID(){
         return this.restID;
+    }
+
+    public void setTitle(String title){
+        this.title = title;
+    }
+
+    public String getTitle(){
+        return this.title;
     }
 }

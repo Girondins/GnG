@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.Gravity;
@@ -75,6 +76,7 @@ public class TapBarMenu extends LinearLayout {
     private int buttonMarginLeft;
     private int menuAnchor;
     private boolean showMenuItems;
+    private Toolbar toolbar;
 
     public TapBarMenu(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -92,6 +94,10 @@ public class TapBarMenu extends LinearLayout {
         setGravity(Gravity.CENTER);
         setupAnimators();
         setupPaint();
+    }
+
+    public void setToolbar(Toolbar toolbar){
+        this.toolbar = toolbar;
     }
 
     private void setupAttributes(AttributeSet attrs) {
@@ -213,7 +219,7 @@ public class TapBarMenu extends LinearLayout {
         Point metricsLarge = new Point();
         display.getCurrentSizeRange(metricsSmall, metricsLarge);
 
-        this.animate().y(menuAnchor == MENU_ANCHOR_BOTTOM ? metricsLarge.y - height : 0)
+        this.animate().y(menuAnchor == MENU_ANCHOR_BOTTOM ? metricsLarge.y - height - toolbar.getHeight() : 0)
                 .setDuration(animationDuration)
                 .setInterpolator(DECELERATE_INTERPOLATOR)
                 .start();

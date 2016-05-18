@@ -28,8 +28,6 @@ public class HackedInputStream extends ObjectInputStream {
             resultClassDescriptor = ObjectStreamClass.lookup(Restaurant.class);
         if (resultClassDescriptor.getName().equals("Filter"))
             resultClassDescriptor = ObjectStreamClass.lookup(Filter.class);
-        if (resultClassDescriptor.getName().equals("ImageHolder"))
-            resultClassDescriptor = ObjectStreamClass.lookup(ImageHolder.class);
         if (resultClassDescriptor.getName().equals("Category"))
             resultClassDescriptor = ObjectStreamClass.lookup(Category.class);
 

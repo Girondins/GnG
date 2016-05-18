@@ -1,27 +1,38 @@
 package com.grabandgo.gng.gng;
 
+import android.animation.Animator;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationSet;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ExpandableListView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +40,7 @@ import android.widget.Toast;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.Style;
@@ -38,11 +50,14 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Projection;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 /**
  * Main activity, GNG Map and navigation.
- * För att appen ska kunna köras måste servern vara igång.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarkerClickListener, MapboxMap.OnMapClickListener, MapboxMap.OnScrollListener, MapboxMap.OnMapLongClickListener, MoreInfoFragment.OnOkClickedListener {
 
     private Controller controller;
 
@@ -50,15 +65,23 @@ public class MainActivity extends AppCompatActivity {
     private MapView mapView;
     private MapboxMap mMap;
 
-    //Animations
+    //MapBox Marker
+    private ImageButton markerButton;
+    private boolean markerSelected = false;
+    private Marker selectedMarker;
     private RelativeLayout restaurantInfo;
-    private ScaleAnimation scaleAnim;
-    private static final TranslateAnimation transAnim = new TranslateAnimation(0, 0, 0, 20);
-    private static AnimationSet animSet = new AnimationSet(true);
-    private static final BounceInterpolator bounceInterpolator = new BounceInterpolator();
+    final MoreInfoFragment moreInfoFragment = new MoreInfoFragment();
 
     //TabBarMenu button.
     private TapBarMenu tapBarMenu;
+
+    private ActionBarDrawerToggle mDrawerToggle;
+
+    private ArrayList<DrawerCategory> categories = new ArrayList<DrawerCategory>();
+    private ArrayList<ArrayList<DrawerSubCategory>> subCategories = new ArrayList<ArrayList<DrawerSubCategory>>();
+    private ArrayList<Integer> subCategoriesCount = new ArrayList<Integer>();
+
+    private int previousGroup = 0;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,30 +98,55 @@ public class MainActivity extends AppCompatActivity {
      */
     private void initGUI() {
         //Change FontFace in actionbar.
-        TextView tv = (TextView) findViewById(R.id.actionbar_title);
+        TextView tvStartUp = (TextView) findViewById(R.id.actionbar_title);
         Typeface face = Typeface.createFromAsset(getAssets(),
                 "fonts/splash-font.ttf");
-        tv.setTypeface(face);
+        assert tvStartUp != null;
+        tvStartUp.setTypeface(face);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.activity_main);
+        populateArrayLists();
+
+        DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        drawer.setDrawerShadow(R.drawable.drawershadow, GravityCompat.START);
+                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        assert mDrawerLayout != null;
+        mDrawerLayout.setDrawerListener(toggle);
+        toggle.syncState();
+
+        final ExpandableListView mExpandableListView = (ExpandableListView) findViewById(R.id.expandable_list_view);
+
+        assert mExpandableListView != null;
+        mExpandableListView.setAdapter(new ExpandableListViewAdapter(this, categories, subCategories, subCategoriesCount, mExpandableListView));
+
 
         tapBarMenu = (TapBarMenu) findViewById(R.id.tapBarMenu);
+        assert tapBarMenu != null;
+        tapBarMenu.setToolbar(toolbar);
         tapBarMenu.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 tapBarMenu.toggle();
+            }
+        });
+
+        ImageButton btnFavourite = (ImageButton) findViewById(R.id.tap_bar_btn_favourite);
+        assert btnFavourite != null;
+        btnFavourite.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                FragmentFavourite mFavouriteFragment = new FragmentFavourite();
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                fragmentTransaction.addToBackStack(null);
+                //fragmentTransaction.setCustomAnimations(R.anim.right_to_centre, R.anim.exit_to_right);
+                fragmentTransaction.replace(R.id.drawer_layout, mFavouriteFragment).commit();
             }
         });
     }
 
     /**
      * Init MapBox components.
+     *
      * @param savedInstanceState - SavedInstanceState
      */
     private void initMapBox(Bundle savedInstanceState) {
@@ -108,84 +156,98 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
+
+                mapboxMap.getUiSettings().setLogoEnabled(false);
+                mapboxMap.getUiSettings().setAttributionEnabled(false);
+                mapboxMap.getUiSettings().setRotateGesturesEnabled(false);
+                mapboxMap.getUiSettings().setCompassEnabled(false);
+                mapboxMap.getUiSettings().setTiltGesturesEnabled(false);
+
+
                 if (controller != null) {
-                    controller.getRestaurants();
+                    //controller.checkConnection();
                 }
 
                 mMap = mapboxMap;
+                mMap.setOnMarkerClickListener(MainActivity.this);
+                mMap.setOnMapClickListener(MainActivity.this);
+                mMap.setOnScrollListener(MainActivity.this);
+                mMap.setOnMapLongClickListener(MainActivity.this);
 
-                mMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(@NonNull Marker marker) {
-                        restaurantSelected(marker);
-                        return true;
-                    }
-                });
 
-                mMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(@NonNull LatLng point) {
 
-                    }
-                });
                 mapboxMap.setStyleUrl(Style.MAPBOX_STREETS);
 
                 IconFactory iconFactory = IconFactory.getInstance(MainActivity.this);
-                Drawable iconDrawable = ContextCompat.getDrawable(MainActivity.this, R.drawable.markerlarge);
-                Icon icon = iconFactory.fromDrawable(iconDrawable);
 
-                mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().position(new LatLng(10, 10)).title("TEST"));
+                Bitmap bm = BitmapFactory.decodeResource(getResources(),
+                        R.drawable.loggadubbel);
+                Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bm, 80, 175, true));
+                Icon icon2 = iconFactory.fromDrawable(d);
+
+
+                mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().position(new LatLng(55.59534300000001, 13.008302500000013)).icon(icon2).title("TEST"));
 
                 // Set the camera's starting position
                 CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(new LatLng(41.885, -87.679)) // set the camera's center position
-                        .zoom(1)  // set the camera's zoom level
-                        .tilt(20)  // set the camera's tilt
+                        .target(new LatLng(45.59534300000001, 20.008302500000013)) // set the camera's center position
+                        .zoom(22)  // set the camera's zoom level
+                        .tilt(50)  // set the camera's tilt
                         .build();
 
-                // Move the camera to that position
                 mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                CameraPosition cameraPosition2 = new CameraPosition.Builder()
+                        .target(new LatLng(55.59534300000001, 13.008302500000013)) // set the camera's center position
+                        .zoom(13.5)  // set the camera's zoom level
+                        .tilt(0)  // set the camera's tilt
+                        .build();
+
+                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2), 5000, null);
             }
         });
 
+        markerButton = (ImageButton) findViewById(R.id.markerbutton);
+        markerButton.setOnClickListener(new MarkerButtonClickListener());
         restaurantInfo = (RelativeLayout) findViewById(R.id.restaurantInfo);
+        restaurantInfo.setClickable(false);
+        restaurantInfo.setFocusable(false);
         restaurantInfo.setVisibility(View.INVISIBLE);
     }
 
-    /**
-     * Init animations.
-     *
-     * @param marker - Marker
-     */
-    private void initAnimations(Marker marker) {
 
-        Point p = getCoordinatesForLayout(restaurantInfo, marker);
-        float pivotX = p.x + restaurantInfo.getWidth() / 2;
-        float pivotY = p.y + restaurantInfo.getHeight() / 2;
 
-        restaurantInfo.setX(p.x);
-        restaurantInfo.setY(p.y);
+    public void setFilterSubCategories(View view) {
+        CheckBox checkBox = (CheckBox) view;
+        if (checkBox.isChecked()) {
+            Toast.makeText(getApplicationContext(), checkBox.getContentDescription().toString(), Toast.LENGTH_SHORT).show();
+            controller.setSubCategoryTrue(checkBox.getContentDescription().toString());
+            controller.filterRestaurants();
+        } else {
+            Toast.makeText(getApplicationContext(), checkBox.getContentDescription().toString(), Toast.LENGTH_SHORT).show();
+            controller.setSubCategoryFalse(checkBox.getContentDescription().toString());
+            controller.filterRestaurants();
+        }
+    }
 
-        scaleAnim = new ScaleAnimation(0.1f, 1f, 0.1f, 1f, ScaleAnimation.ABSOLUTE, pivotX, ScaleAnimation.ABSOLUTE, pivotY);
-
-        animSet.reset();
-        animSet.addAnimation(scaleAnim);
-        animSet.addAnimation(transAnim);
-        animSet.setFillAfter(true);
-        animSet.setDuration(700);
-
-        animSet.setInterpolator(bounceInterpolator);
+    public LinkedList<Restaurant> getFavourites() {
+        return controller.getFavourites();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        File f = new File("/data/data/com.grabandgo.gng.gng/shared_prefs/Favourites.xml");
+        if(f.exists()){
+            controller.getSavedFavouriteRestaurants();
+        }
         mapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        controller.saveFavouriteRestaurants();
         mapView.onPause();
     }
 
@@ -204,17 +266,50 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        controller.saveFavouriteRestaurants();
         mapView.onDestroy();
+    }
+
+    public void clearMarkers(){
+        mMap.removeAnnotations();
+    }
+
+    public void requestReconnect(){
+        runOnUiThread(new Reconnect());
+    }
+
+    private class Reconnect implements Runnable{
+
+        @Override
+        public void run() {
+            Toast toast = Toast.makeText(getApplicationContext(), "Failed to connect to server \n \t Trying to reconnect", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0,0);
+            toast.show();
+            controller.reconnect();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.activity_main);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        assert drawer != null;
+
+        int count = getFragmentManager().getBackStackEntryCount();
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (count > 0) {
+            getFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
@@ -237,29 +332,224 @@ public class MainActivity extends AppCompatActivity {
         return point;
     }
 
-    private void restaurantSelected(Marker marker) {
-        initAnimations(marker);
-
-        restaurantInfo.setVisibility(View.VISIBLE);
-
-        scaleAnim.setDuration(400);
-        scaleAnim.setFillAfter(true);
-
-        restaurantInfo.startAnimation(animSet);
-
-        /**
-         //TODO: TEMP ID IGEN
-         if(controller != null && controller.getRestaurantList() != null) {
-         for (Restaurant r : controller.getRestaurantList()) {
-         if (Integer.toString(r.getID()).equals(marker.getTitle())) {
-         restaurantSelected(r);
-         }
-         }
-         }
-         **/
-    }
-
     public void addMarker(Restaurant restaurant) {
         mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().position(new LatLng(restaurant.getLatitude(), restaurant.getLongitude())).title(String.valueOf(restaurant.getID())));
+    }
+
+    private void openMarker(Marker marker){
+        restaurantInfo.setVisibility(View.VISIBLE);
+        restaurantInfo.setScaleY(0.3f);
+        restaurantInfo.setScaleX(0.3f);
+        Point p = getCoordinatesForLayout(restaurantInfo, marker);
+        BounceInterpolator bounceInterpolator = new BounceInterpolator();
+        float startY = (p.y - restaurantInfo.getHeight()/8);
+        float newY = p.y - restaurantInfo.getHeight() / 2;
+        restaurantInfo.setX(p.x);
+        restaurantInfo.setY(startY);
+        restaurantInfo.animate().scaleX(1f).scaleY(1f).x(p.x).setListener(null).y(newY).setInterpolator(bounceInterpolator).setDuration(600).start();
+    }
+
+    private void closeMarker(Marker marker){
+        final Point p = getCoordinatesForLayout(restaurantInfo, marker);
+        AccelerateInterpolator accelerateInterpolator = new AccelerateInterpolator();
+
+        Animator.AnimatorListener listener = new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {}
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                markerSelected = false;
+                restaurantInfo.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {}
+        };
+        restaurantInfo.animate().scaleX(0.1f).scaleY(0.1f).x(p.x).y(p.y - restaurantInfo.getHeight()/20).setListener(listener).setInterpolator(null).setDuration(250).start();
+    }
+
+    private void toggleMarker(Marker oldmarker, final Marker newmarker){
+        final Point p = getCoordinatesForLayout(restaurantInfo, oldmarker);
+        Animator.AnimatorListener listener = new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                restaurantInfo.setVisibility(View.INVISIBLE);
+                openMarker(newmarker);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        };
+        restaurantInfo.animate().scaleX(0.1f).scaleY(0.1f).x(p.x).y(p.y).setListener(listener).setInterpolator(null).setDuration(250).start();
+    }
+
+    private void populateArrayLists() {
+
+        String[] categoriesName = {"Asiatiskt", "Europeiskt", "Orientalsikt", "Latin Amerikanskt", "Allergier"};
+        String[] subAsian = {"Thai", "Kinesiskt", "Japanskt", "Koreanskt", "Vietnamesiskt", "Mongoliskt"};
+        String[] subEuro = {"Skandinaviskt", "Italienskt", "Franskt", "Grekiskt", "Spanskt", "Balkan"};
+        String[] subOriental = {"Turkiskt", "Libanesiskt", "Irakiskt", "Persiskt"};
+        String[] subLatinAmerican = {"Brazilianskt", "Mexikanskt", "Argentinskt", "Kubanskt"};
+        String[] subAllergies = {"Laktos", "Gluten", "Ägg", "Soya", "Skaldjur", "Nötter"};
+
+        categories.clear();
+
+        for (int i = 0; i < categoriesName.length; i++) {
+            DrawerCategory drawerCategory = new DrawerCategory();
+            drawerCategory.setCategory(categoriesName[i]);
+            categories.add(drawerCategory);
+        }
+
+        subCategories.clear();
+
+        ArrayList<DrawerSubCategory> tempSubCat = new ArrayList<DrawerSubCategory>();
+        DrawerSubCategory drawerSubCategory;
+
+        for (int i = 0; i < subAsian.length; i++) {
+            drawerSubCategory = new DrawerSubCategory();
+            drawerSubCategory.setSubCategory(subAsian[i]);
+            tempSubCat.add(drawerSubCategory);
+
+        }
+
+        subCategories.add(tempSubCat);
+        subCategoriesCount.add(tempSubCat.size());
+
+        tempSubCat = new ArrayList<DrawerSubCategory>();
+
+        for (int i = 0; i < subEuro.length; i++) {
+            drawerSubCategory = new DrawerSubCategory();
+            drawerSubCategory.setSubCategory(subEuro[i]);
+            tempSubCat.add(drawerSubCategory);
+        }
+
+        subCategories.add(tempSubCat);
+        subCategoriesCount.add(tempSubCat.size());
+
+        tempSubCat = new ArrayList<DrawerSubCategory>();
+
+        for (int i = 0; i < subOriental.length; i++) {
+            drawerSubCategory = new DrawerSubCategory();
+            drawerSubCategory.setSubCategory(subOriental[i]);
+            tempSubCat.add(drawerSubCategory);
+        }
+
+        subCategories.add(tempSubCat);
+        subCategoriesCount.add(tempSubCat.size());
+
+        tempSubCat = new ArrayList<DrawerSubCategory>();
+
+        for (int i = 0; i < subLatinAmerican.length; i++) {
+            drawerSubCategory = new DrawerSubCategory();
+            drawerSubCategory.setSubCategory(subLatinAmerican[i]);
+            tempSubCat.add(drawerSubCategory);
+        }
+
+        subCategories.add(tempSubCat);
+        subCategoriesCount.add(tempSubCat.size());
+
+        tempSubCat = new ArrayList<DrawerSubCategory>();
+
+        for (int i = 0; i < subAllergies.length; i++) {
+            drawerSubCategory = new DrawerSubCategory();
+            drawerSubCategory.setSubCategory(subAllergies[i]);
+            tempSubCat.add(drawerSubCategory);
+        }
+
+        subCategories.add(tempSubCat);
+        subCategoriesCount.add(tempSubCat.size());
+
+        tempSubCat = null;
+    }
+
+    private class MarkerButtonClickListener implements Button.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            final RelativeLayout container = (RelativeLayout) findViewById(R.id.fragment_container);
+            FragmentManager fragmentManager = getFragmentManager();
+            final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.fragment_container, moreInfoFragment, "More Info");
+            fragmentTransaction.commit();
+
+            closeMarker(selectedMarker);
+
+            mapView.animate().alpha(0.3f).setDuration(750).start();
+            tapBarMenu.setVisibility(View.INVISIBLE);
+            tapBarMenu.setVisibility(View.GONE);
+
+        }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        if (!markerSelected) {
+            openMarker(marker);
+        }else if (markerSelected){
+            toggleMarker(selectedMarker, marker);
+        }
+        markerSelected = true;
+        selectedMarker = marker;
+
+        /*
+        //TODO: TEMP ID IGEN
+        if(controller != null && controller.getRestaurantList() != null) {
+            for (Restaurant r : controller.getRestaurantList()) {
+                if (Integer.toString(r.getID()).equals(marker.getTitle())) {
+                    restaurantSelected(r);
+                }
+            }
+        }
+        */
+        return true;
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+        if (selectedMarker != null && markerSelected) {
+            markerSelected = false;
+            closeMarker(selectedMarker);
+        }
+    }
+
+    @Override
+    public void onScroll() {
+        if (selectedMarker != null && markerSelected) {
+            markerSelected = false;
+            closeMarker(selectedMarker);
+        }
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        if (selectedMarker != null && markerSelected) {
+            markerSelected = false;
+            closeMarker(selectedMarker);
+        }
+    }
+
+    @Override
+    public void onOkClickedListener() {
+        getFragmentManager().beginTransaction().remove(moreInfoFragment).commit();
+        tapBarMenu.setVisibility(View.VISIBLE);
+        mapView.animate().alpha(1f).setDuration(700).start();
     }
 }
