@@ -5,11 +5,13 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -50,6 +52,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Projection;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -86,8 +89,19 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     private ArrayList<DrawerCategory> categories = new ArrayList<DrawerCategory>();
     private ArrayList<ArrayList<DrawerSubCategory>> subCategories = new ArrayList<ArrayList<DrawerSubCategory>>();
     private ArrayList<Integer> subCategoriesCount = new ArrayList<Integer>();
+    private ArrayList<Marker> markerList = new ArrayList<Marker>();
+
+    private LinkedList<Restaurant> restaurantsList = new LinkedList<>();
 
     private int previousGroup = 0;
+
+
+    private Restaurant selectedRestaurant = null;
+
+
+
+
+
 
 
     //ICONS
@@ -170,13 +184,11 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
-
                 mapboxMap.getUiSettings().setLogoEnabled(false);
                 mapboxMap.getUiSettings().setAttributionEnabled(false);
                 mapboxMap.getUiSettings().setRotateGesturesEnabled(false);
                 mapboxMap.getUiSettings().setCompassEnabled(false);
                 mapboxMap.getUiSettings().setTiltGesturesEnabled(false);
-
 
                 if (controller != null) {
                     //controller.checkConnection();
@@ -214,6 +226,15 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
                         .build();
 
                 mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2), 5000, null);
+
+
+
+
+                //TODO: för test av markers
+
+                restaurantsList.add(populateMapWithTemp());
+                addMarker(restaurantsList.get(0));
+
             }
         });
 
@@ -334,12 +355,11 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         mapView.onDestroy();
     }
 
-    ArrayList<Marker> m = new ArrayList<Marker>();
 
     public void clearMarkers(){
         //mMap.removeAnnotations();
 
-        for (Marker m1 : m){
+        for (Marker m1 : markerList){
             mMap.removeMarker(m1);
             Log.d("Rest", m1.getTitle());
         }
@@ -406,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     public void addMarker(Restaurant restaurant) {
         Marker marker = mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().icon(icon2).position(new LatLng(restaurant.getLatitude(), restaurant.getLongitude())).title(String.valueOf(restaurant.getID())));
-        m.add(marker);
+        markerList.add(marker);
     }
 
     private void openMarker(Marker marker){
@@ -573,6 +593,18 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     @Override
     public boolean onMarkerClick(Marker marker) {
 
+        for(Restaurant r : restaurantsList){
+            if(r.getID() == Integer.valueOf(marker.getTitle())){
+                selectedRestaurant = r;
+                Log.d("GnG", "SELECTED: " + r.getName());
+                break;
+            }
+        }
+
+        setUpRestaurantInfoOnClick();
+
+
+
         if (!markerSelected) {
             openMarker(marker);
         }else if (markerSelected){
@@ -580,7 +612,6 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         }
         markerSelected = true;
         selectedMarker = marker;
-
         /*
         //TODO: TEMP ID IGEN
         if(controller != null && controller.getRestaurantList() != null) {
@@ -592,6 +623,16 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         }
         */
         return true;
+    }
+
+    private void setUpRestaurantInfoOnClick(){
+
+        Log.d("GnG", selectedRestaurant.getLogoRaw()+"");
+
+        ImageView imageLogo = (ImageView)findViewById(R.id.restaurantLogoIV);
+        Bitmap bm = BitmapFactory.decodeByteArray(selectedRestaurant.getLogoRaw(), 0, selectedRestaurant.getLogoRaw().length);
+        imageLogo.setImageBitmap(bm);
+
     }
 
     @Override
@@ -624,5 +665,50 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         getFragmentManager().beginTransaction().remove(moreInfoFragment).commit();
         tapBarMenu.setVisibility(View.VISIBLE);
         mapView.animate().alpha(1f).setDuration(700).start();
+    }
+
+
+    private Restaurant populateMapWithTemp() {
+
+        Restaurant r1 = new Restaurant("Möllans Falafel");
+        r1.setLongitude(13.00916970000003);
+        r1.setLatitude(55.5953891);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            r1.setRestaurantPicRaw(drawableToByteArray(getDrawable(R.drawable.falafel)));
+            r1.setLogoRaw(drawableToByteArray(getDrawable(R.drawable.vigarda)));
+        } else {
+            r1.setRestaurantPicRaw(drawableToByteArray(getResources().getDrawable(R.drawable.falafel)));
+            r1.setLogoRaw(drawableToByteArray(getResources().getDrawable(R.drawable.vigarda)));
+        }
+        r1.setID(1);
+        r1.setRating(3);
+        r1.setEmail("falafel@kebab.com");
+        r1.setNumber("073 001 101 00");
+        return r1;
+    }
+
+
+
+
+    public static byte[] drawableToByteArray(Drawable drawable) {
+        final int width = !drawable.getBounds().isEmpty() ? drawable
+                .getBounds().width() : drawable.getIntrinsicWidth();
+
+        final int height = !drawable.getBounds().isEmpty() ? drawable
+                .getBounds().height() : drawable.getIntrinsicHeight();
+
+        final Bitmap bitmap = Bitmap.createBitmap(width <= 0 ? 1 : width,
+                height <= 0 ? 1 : height, Bitmap.Config.ARGB_8888);
+        Log.v("Bitmap width - Height :", width + " : " + height);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+
+
+        return byteArray;
     }
 }
