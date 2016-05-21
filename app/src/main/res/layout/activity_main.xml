@@ -68,21 +68,60 @@
                     android:layout_height="match_parent"
                     android:id="@+id/imageView"
                     android:layout_alignParentBottom="true"
-                    android:src="@drawable/standardmarker"
+                    android:src="@drawable/vigarda"
                     android:layout_centerInParent="true" />
+
+                <ImageButton
+                    android:layout_width="160dp"
+                    android:layout_height="110dp"
+                    android:id="@+id/markerbutton"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="2dp"
+                    android:background="#00ffffff" />
 
                 <ImageButton
                     android:layout_width="35dp"
                     android:layout_height="35dp"
-                    android:id="@+id/markerbutton"
+                    android:id="@+id/directionsButton"
                     android:layout_centerHorizontal="true"
+                    android:layout_marginTop="110dp"
+                    android:src="@drawable/directiongreen"
+                    android:scaleType="fitXY"
+                    android:background="#00ffffff" />
 
-                    android:cropToPadding="false"
-                    android:src="@drawable/menuicon"
-                    android:scaleType="fitCenter"
-                    android:background="#00ffffff"
-                    android:layout_alignParentBottom="false"
-                    android:layout_marginTop="120dp" />
+                <ImageButton
+                    android:layout_width="33dp"
+                    android:layout_height="33dp"
+                    android:id="@+id/favoritebutton"
+                    android:src="@drawable/heartwhite"
+                    android:scaleType="fitXY"
+                    android:layout_toLeftOf="@+id/directionsButton"
+                    android:layout_marginTop="112dp"
+                    android:background="#00ffffff" />
+
+                <ImageButton
+                    android:layout_width="33dp"
+                    android:layout_height="33dp"
+                    android:id="@+id/ratingbutton"
+                    android:src="@drawable/rating3"
+                    android:scaleType="fitXY"
+                    android:layout_marginTop="110dp"
+                    android:layout_toRightOf="@+id/directionsButton"
+                    android:background="#00ffffff" />
+
+                <ImageButton
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:id="@+id/coinimage"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="33dp"
+                    android:src="@drawable/coinsilver"
+                    android:scaleType="fitXY"
+                    android:background="#00ffffff" />
 
             </RelativeLayout>
         </RelativeLayout>

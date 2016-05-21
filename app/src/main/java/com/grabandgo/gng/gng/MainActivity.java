@@ -65,6 +65,12 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     private MapView mapView;
     private MapboxMap mMap;
 
+    //Marker buttons
+    private ImageButton markerFavouritBtn;
+    private ImageButton markerDirectionsBtn;
+    private ImageButton markerRatingBtn;
+    private ImageButton markerCoinBtn;
+
     //MapBox Marker
     private ImageButton markerButton;
     private boolean markerSelected = false;
@@ -82,6 +88,15 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     private ArrayList<Integer> subCategoriesCount = new ArrayList<Integer>();
 
     private int previousGroup = 0;
+
+
+    //ICONS
+
+    IconFactory iconFactory;
+    Bitmap bm;
+    Drawable d;
+    Icon icon2;
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,8 +134,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         final ExpandableListView mExpandableListView = (ExpandableListView) findViewById(R.id.expandable_list_view);
 
         assert mExpandableListView != null;
-        mExpandableListView.setAdapter(new ExpandableListViewAdapter(this, categories, subCategories, subCategoriesCount, mExpandableListView));
-
+        mExpandableListView.setAdapter(new ExpandableListViewAdapter(this, categories, subCategories, subCategoriesCount, mExpandableListView, this));
 
         tapBarMenu = (TapBarMenu) findViewById(R.id.tapBarMenu);
         assert tapBarMenu != null;
@@ -178,15 +192,11 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
                 mapboxMap.setStyleUrl(Style.MAPBOX_STREETS);
 
-                IconFactory iconFactory = IconFactory.getInstance(MainActivity.this);
-
-                Bitmap bm = BitmapFactory.decodeResource(getResources(),
+                iconFactory = IconFactory.getInstance(MainActivity.this);
+                bm = BitmapFactory.decodeResource(getResources(),
                         R.drawable.loggadubbel);
-                Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bm, 80, 175, true));
-                Icon icon2 = iconFactory.fromDrawable(d);
-
-
-                mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().position(new LatLng(55.59534300000001, 13.008302500000013)).icon(icon2).title("TEST"));
+                d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bm, 80, 175, true));
+                icon2 = iconFactory.fromDrawable(d);
 
                 // Set the camera's starting position
                 CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -207,12 +217,69 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
             }
         });
 
-        markerButton = (ImageButton) findViewById(R.id.markerbutton);
-        markerButton.setOnClickListener(new MarkerButtonClickListener());
         restaurantInfo = (RelativeLayout) findViewById(R.id.restaurantInfo);
         restaurantInfo.setClickable(false);
         restaurantInfo.setFocusable(false);
         restaurantInfo.setVisibility(View.INVISIBLE);
+
+        initMarkerButtons();
+    }
+
+    boolean isFav = false;
+    private void initMarkerButtons(){
+        markerButton = (ImageButton) findViewById(R.id.markerbutton);
+
+
+        markerButton.setOnClickListener(new MarkerButtonClickListener());
+        /*
+        markerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.d("GnG", "MARKER BUTTON CLICK");
+
+                final RelativeLayout container = (RelativeLayout) findViewById(R.id.fragment_container);
+                FragmentManager fragmentManager = getFragmentManager();
+                final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.add(R.id.fragment_container, moreInfoFragment, "More Info");
+                fragmentTransaction.commit();
+                closeMarker(selectedMarker);
+                mapView.animate().alpha(0.3f).setDuration(750).start();
+                tapBarMenu.setVisibility(View.INVISIBLE);
+                tapBarMenu.setVisibility(View.GONE);
+            }
+        });
+        */
+
+        markerFavouritBtn = (ImageButton)findViewById(R.id.favoritebutton);
+        markerFavouritBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(!isFav) {
+                    markerFavouritBtn.setImageResource(R.drawable.heartred);
+                    getFavourites().add(new Restaurant("Vigårda"));
+                }else{
+                    markerFavouritBtn.setImageResource(R.drawable.heartwhite);
+
+                    int i =0;
+                    for (Restaurant r : getFavourites()){
+                        if (r.getName().equals("Vigårda")){
+                            getFavourites().remove(i);
+                            i++;
+                        }
+                    }
+                }
+
+                isFav = !isFav;
+
+            }
+        });
+
+        markerDirectionsBtn = (ImageButton)findViewById(R.id.directionsButton);
+        markerRatingBtn = (ImageButton)findViewById(R.id.ratingbutton);
+
+
     }
 
 
@@ -221,12 +288,9 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         CheckBox checkBox = (CheckBox) view;
         if (checkBox.isChecked()) {
             Toast.makeText(getApplicationContext(), checkBox.getContentDescription().toString(), Toast.LENGTH_SHORT).show();
-            controller.setSubCategoryTrue(checkBox.getContentDescription().toString());
-            controller.filterRestaurants();
+            //controller.setSubCategoryTrue(checkBox.getContentDescription().toString());
         } else {
-            Toast.makeText(getApplicationContext(), checkBox.getContentDescription().toString(), Toast.LENGTH_SHORT).show();
-            controller.setSubCategoryFalse(checkBox.getContentDescription().toString());
-            controller.filterRestaurants();
+            //controller.setSubCategoryFalse(checkBox.getContentDescription().toString());
         }
     }
 
@@ -270,8 +334,16 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         mapView.onDestroy();
     }
 
+    ArrayList<Marker> m = new ArrayList<Marker>();
+
     public void clearMarkers(){
-        mMap.removeAnnotations();
+        //mMap.removeAnnotations();
+
+        for (Marker m1 : m){
+            mMap.removeMarker(m1);
+            Log.d("Rest", m1.getTitle());
+        }
+
     }
 
     public void requestReconnect(){
@@ -333,7 +405,8 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     }
 
     public void addMarker(Restaurant restaurant) {
-        mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().position(new LatLng(restaurant.getLatitude(), restaurant.getLongitude())).title(String.valueOf(restaurant.getID())));
+        Marker marker = mMap.addMarker(new com.mapbox.mapboxsdk.annotations.MarkerOptions().icon(icon2).position(new LatLng(restaurant.getLatitude(), restaurant.getLongitude())).title(String.valueOf(restaurant.getID())));
+        m.add(marker);
     }
 
     private void openMarker(Marker marker){
@@ -401,11 +474,11 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     private void populateArrayLists() {
 
-        String[] categoriesName = {"Asiatiskt", "Europeiskt", "Orientalsikt", "Latin Amerikanskt", "Allergier"};
-        String[] subAsian = {"Thai", "Kinesiskt", "Japanskt", "Koreanskt", "Vietnamesiskt", "Mongoliskt"};
-        String[] subEuro = {"Skandinaviskt", "Italienskt", "Franskt", "Grekiskt", "Spanskt", "Balkan"};
-        String[] subOriental = {"Turkiskt", "Libanesiskt", "Irakiskt", "Persiskt"};
-        String[] subLatinAmerican = {"Brazilianskt", "Mexikanskt", "Argentinskt", "Kubanskt"};
+        String[] categoriesName = {"Asiatisk", "Europeisk", "Orientalisk", "Latin Amerikansk", "Allergi"};
+        String[] subAsian = {"Thailändsk", "Kinesisk", "Japansk", "Koreansk", "Vietnamesisk", "Mongolisk"};
+        String[] subEuro = {"Skandinavisk", "Italiensk", "Fransk", "Grekisk", "Spansk", "Balkan"};
+        String[] subOriental = {"Turkisk", "Libanesisk", "Irakisk", "Persisk"};
+        String[] subLatinAmerican = {"Brasilianskt", "Mexikanskt", "Argentinskt", "Kubansk"};
         String[] subAllergies = {"Laktos", "Gluten", "Ägg", "Soya", "Skaldjur", "Nötter"};
 
         categories.clear();

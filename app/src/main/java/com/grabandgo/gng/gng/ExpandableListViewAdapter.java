@@ -1,6 +1,7 @@
 package com.grabandgo.gng.gng;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,16 +22,22 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
     private ArrayList<Integer> drawerSubCategoryCount = new ArrayList<Integer>();
     private ExpandableListView expandableListView;
     private int lastExpandedGroupPosition;
+    private MainActivity main;
+    private Typeface tf;
 
     private DrawerSubCategory singleChild = new DrawerSubCategory();
 
-    public ExpandableListViewAdapter(Context context, ArrayList<DrawerCategory> drawerCategory, ArrayList<ArrayList<DrawerSubCategory>> subCategory, ArrayList<Integer> drawerSubCategoryCount, ExpandableListView expandableListView) {
+    public ExpandableListViewAdapter(Context context, ArrayList<DrawerCategory> drawerCategory, ArrayList<ArrayList<DrawerSubCategory>> subCategory, ArrayList<Integer> drawerSubCategoryCount, ExpandableListView expandableListView, MainActivity main) {
         layoutInflater = LayoutInflater.from(context);
+        this.main = main;
         this.drawerCategory = drawerCategory;
         this.drawersubCategory = subCategory;
         this.drawerSubCategoryCount = drawerSubCategoryCount;
         this.expandableListView = expandableListView;
         lastExpandedGroupPosition = 0;
+
+        tf = Typeface.createFromAsset(main.getAssets(),
+                "fonts/HelveticaNeueLight.ttf");
     }
 
     @Override
@@ -92,8 +99,9 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
             view = layoutInflater.inflate(R.layout.drawer_category, viewGroup, false);
         }
 
-        TextView textView = (TextView) view.findViewById(R.id.category_name);
-        textView.setText(getGroup(i).toString());
+        TextView tvCategoryName = (TextView) view.findViewById(R.id.category_name);
+        tvCategoryName.setText(getGroup(i).toString());
+        tvCategoryName.setTypeface(tf);
 
         return view;
     }
@@ -105,8 +113,10 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
         }
 
         singleChild = getChild(i, i1);
-        TextView childSubCategoryName = (TextView) view.findViewById(R.id.subcategory_name);
-        childSubCategoryName.setText(singleChild.getSubCategory());
+
+        TextView tvSubCategoryName = (TextView) view.findViewById(R.id.subcategory_name);
+        tvSubCategoryName.setText(singleChild.getSubCategory());
+        tvSubCategoryName.setTypeface(tf);
 
         CheckBox checkBox = (CheckBox) view.findViewById(R.id.subCat_checkbox);
         checkBox.setContentDescription(singleChild.getSubCategory());

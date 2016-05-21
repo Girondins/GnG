@@ -14,7 +14,7 @@ public class Category implements Serializable {
 
     public Category(String category, String subCategory) {
         this.category = category;
-        this.category = subCategory;
+        this.subCategory = subCategory;
     }
 
     public void setCategory(String category) {

@@ -31,11 +31,10 @@ public class Controller {
     public Controller(MainActivity main) {
         this.main = main;
         favouriteRestaurants = new LinkedList<Restaurant>();
-        addToFavourite(new Restaurant("Hej"));
         try {
             Log.d("Connecting", "client");
             filter = new Filter();
-            client = new Client("192.168.1.215", 3000, this);
+            client = new Client("172.20.10.4", 3000, this);
             client.enableConnect();
         } catch (IOException e) {
             System.err.println(e);
@@ -194,6 +193,7 @@ public class Controller {
             }
             es.shutdown();
             main.clearMarkers();
+            Log.d("Clear markers", "true");
             initiateRestaurants(filterdRestaurants);
             try {
                 es.awaitTermination(1, TimeUnit.MINUTES);
@@ -221,6 +221,7 @@ public class Controller {
             for (int i = from; i < to; i++) {
                 currentRestFilter = restaurants.get(i).getRestaurantFilter();
                 for (int j = 0; j < currentRestFilter.length(); j++) {
+                    Log.d("asdasd", filter.getCategoryStatus(j)+"");
                     if (currentRestFilter.getCategoryStatus(j) != filter.getCategoryStatus(j)) {
                         return;
                     } else
@@ -228,6 +229,5 @@ public class Controller {
                 }
             }
         }
-
     }
 }

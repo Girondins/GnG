@@ -29,13 +29,11 @@ public class Client extends Thread {
     private InetAddress address;
     private Buffer<Object> receiverBuff;
     private Controller cont;
-    private MainActivity main;
     private Timer timer = new Timer();
 
-    public Client(String ip, int port, Controller cont,MainActivity main) throws UnknownHostException, IOException {
+    public Client(String ip, int port, Controller cont) throws UnknownHostException, IOException {
         this.ip = ip;
         this.port = port;
-        this.main = main;
         exThread = new ExecuteThread();
         thread.start();
         exThread.start();
@@ -152,13 +150,9 @@ public class Client extends Thread {
     }
 
     private class TryConnect extends TimerTask{
-
         @Override
         public void run() {
             cont.checkConnection();
         }
     }
-
-
-
 }
