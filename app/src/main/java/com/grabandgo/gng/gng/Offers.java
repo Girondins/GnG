@@ -21,7 +21,12 @@ public class Offers implements Serializable{
     private String type;
     private String whom;
     private int restID;
-    private byte[] imageBytes;
+
+    //  private byte[] imageBytes;
+    private String imagePath;
+
+
+
 
     public void setStart(String start) {
         this.start = start;
@@ -70,13 +75,22 @@ public class Offers implements Serializable{
     public String getType() {
         return type;
     }
+    /**
+     public void setImageBytes(byte[] imagebytes){
+     this.imageBytes = imagebytes;
+     }
 
-    public void setImageBytes(byte[] imagebytes){
-        this.imageBytes = imagebytes;
+     public byte[] getImageBytes(){
+     return imageBytes;
+     }
+     **/
+
+    public void setImagePath(String imagePath){
+        this.imagePath = imagePath;
     }
 
-    public byte[] getImageBytes(){
-        return imageBytes;
+    public String getImagePath(){
+        return this.imagePath;
     }
 
     public void setRestID(int id){

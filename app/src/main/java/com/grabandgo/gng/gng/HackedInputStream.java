@@ -34,4 +34,3 @@ public class HackedInputStream extends ObjectInputStream {
         return resultClassDescriptor;
     }
 }
-

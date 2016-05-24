@@ -1,7 +1,9 @@
 package com.grabandgo.gng.gng;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -11,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,24 +27,27 @@ public class Controller {
     private LinkedList<Restaurant> restaurants;
     private Client client;
     private MainActivity main;
-    private LinkedList<Restaurant> filterdRestaurants;
+    private Object lock = new Object();
+    private LinkedList<Restaurant> filterdRestaurants = new LinkedList<Restaurant>();
     private LinkedList<Restaurant> favouriteRestaurants;
-    private Filter filter = new Filter();
+    private LinkedList<String> filtersChecked = new LinkedList<String>();
+
+   // private Filter filter = new Filter();
 
     public Controller(MainActivity main) {
         this.main = main;
         favouriteRestaurants = new LinkedList<Restaurant>();
         try {
             Log.d("Connecting", "client");
-            filter = new Filter();
-            client = new Client("172.20.10.4", 3000, this);
+           // filter = new Filter();
+            client = new Client("192.168.1.215", 3000, this);
             client.enableConnect();
         } catch (IOException e) {
             System.err.println(e);
         }
     }
 
-    public void setSubCategoryTrue(String subCategory){
+   /** public void setSubCategoryTrue(String subCategory){
         filter.setSubCategoryTrue(subCategory);
         filterRestaurants();
     }
@@ -51,8 +57,34 @@ public class Controller {
         filterRestaurants();
     }
 
+    **/
+
+    public void setFilterCategory(String category){
+        filtersChecked.add(category);
+        filterRestaurants();
+    }
+
+    public void removeFilterCategory(String category){
+        Log.d("REmoving Cat", category);
+        filtersChecked.remove(category);
+        Log.d("Check", filtersChecked.size() + "");
+        filterRestaurants();
+    }
+
+    public void onlyFilterRemoval(String category){
+        filtersChecked.remove(category);
+    }
+
+    public void initAllRest(){
+        initiateRestaurants(restaurants);
+    }
+
     public void getRestaurants() {
         client.request("getRestaurants");
+    }
+
+    public LinkedList<Restaurant> fetchRestaurants(){
+        return restaurants;
     }
 
     public void setRestaurants(LinkedList<Restaurant> restaurants) {
@@ -61,9 +93,10 @@ public class Controller {
     }
 
     public void filterRestaurants() {
-        filterdRestaurants = new LinkedList<Restaurant>();
-        Thread t = new Thread(new CheckFilter());
-        t.start();
+        Log.d("Restaurant Filteeeerr", filterdRestaurants.size() + "");
+        checkFil();
+    //    Thread t = new Thread(new CheckFilter());
+    //    t.start();
     }
 
     public void initiateRestaurants(LinkedList<Restaurant> initRest) {
@@ -125,12 +158,12 @@ public class Controller {
 
             Restaurant r = new Restaurant();
             r.setID(ID);
-            r.setLogoRaw(logoSrc);
+      //      r.setLogoRaw(logoSrc);
             r.setLongitude(lon);
             r.setLatitude(lat);
             r.setName(name);
             r.setRating(rating);
-            r.setRestaurantPicRaw(picSrc);
+      //      r.setRestaurantPicRaw(picSrc);
 
         }
 
@@ -179,37 +212,70 @@ public class Controller {
         }
     }
 
-    private class CheckFilter implements Runnable {
-        int from, to, threadCount = 10;
 
+    public void checkFil(){
+        int factor, from, to, threadCount = 10;
+            filterdRestaurants.clear();
+
+        Log.d("Filterd Resteee", filterdRestaurants.size() + "");
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        if (restaurants.size() < threadCount) {
+            //  new Thread(new Filtering(0, restaurants.size(), restaurants, filtersChecked)).start();
+            threadCount = 1;
+        }
+        factor = (restaurants.size() / threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            from = i * factor;
+            to = i * factor + factor;
+            executorService.execute(new Filtering(from, to, restaurants, filtersChecked));
+            Log.d("Factor Threads", threadCount + " " + factor);
+        }
+        executorService.shutdown();
+        main.clearMarkers();
+        Log.d("Clear markers", "true");
+        initiateRestaurants(filterdRestaurants);
+        Log.d("Filterd Rest", filterdRestaurants.size() + "");
+    }
+
+    private class CheckFilter implements Runnable {
+        int factor, from, to, threadCount = 10;
+
+        @TargetApi(Build.VERSION_CODES.GINGERBREAD)
         @Override
         public void run() {
-            ExecutorService es = Executors.newFixedThreadPool(10);
-            int factor = restaurants.size() / threadCount;
-            for (int i = 0; i < threadCount; i++) {
-                from = i * factor;
-                to = i * factor + factor;
-                es.execute(new Filtering(from, to, restaurants, filter));
+            ExecutorService executeService = Executors.newFixedThreadPool(10);
+            if (restaurants.size() < threadCount) {
+              //  new Thread(new Filtering(0, restaurants.size(), restaurants, filtersChecked)).start();
+                threadCount = 1;
             }
-            es.shutdown();
-            main.clearMarkers();
-            Log.d("Clear markers", "true");
-            initiateRestaurants(filterdRestaurants);
-            try {
-                es.awaitTermination(1, TimeUnit.MINUTES);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                factor = (restaurants.size() / threadCount);
+                for (int i = 0; i < threadCount; i++) {
+                    from = i * factor;
+                    to = i * factor + factor;
+                    executeService.execute(new Filtering(from, to, restaurants, filtersChecked));
+                    Log.d("Factor Threads", threadCount + "");
+                }
+                executeService.shutdown();
+                main.clearMarkers();
+                Log.d("Clear markers", "true");
+                initiateRestaurants(filterdRestaurants);
+                Log.d("Filterd Rest", filterdRestaurants.size() + "");
+                try {
+                    executeService.awaitTermination(1, TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
         }
     }
 
     private class Filtering implements Runnable {
         private int from, to;
         private LinkedList<Restaurant> restaurants;
-        private Filter filter;
-        private Filter currentRestFilter;
+        private LinkedList<String> filter;
+        private ArrayList<String> currentRestFilter;
 
-        public Filtering(int from, int to, LinkedList<Restaurant> restaurants, Filter filter) {
+        public Filtering(int from, int to, LinkedList<Restaurant> restaurants, LinkedList<String> filter) {
             this.from = from;
             this.to = to;
             this.restaurants = restaurants;
@@ -218,16 +284,49 @@ public class Controller {
 
         @Override
         public void run() {
+            Log.d("Filterd Thread", filterdRestaurants.size() + "");
+            Log.d("From", from +" " + to);
             for (int i = from; i < to; i++) {
-                currentRestFilter = restaurants.get(i).getRestaurantFilter();
-                for (int j = 0; j < currentRestFilter.length(); j++) {
-                    Log.d("asdasd", filter.getCategoryStatus(j)+"");
-                    if (currentRestFilter.getCategoryStatus(j) != filter.getCategoryStatus(j)) {
-                        return;
-                    } else
-                        filterdRestaurants.add(restaurants.get(j));
+                currentRestFilter = restaurants.get(i).getFilters();
+                for(int j = 0 ; j<filter.size(); j++){
+                    Log.d("Checking Filter", filter.get(j));
+                    if(currentRestFilter.contains(filter.get(j))){
+                            filterdRestaurants.add(restaurants.get(i));
+                        Log.d("Adding Rest", restaurants.get(i).getName());
+                    }
                 }
+
+
+
+        /**        if(compareFilters(filter,currentRestFilter)){
+                    filterdRestaurants.add(restaurants.get(i));
+                    Log.d("AddingRest",restaurants.get(i).getName());
+                }
+
+         **/
             }
         }
     }
+
+  /**  public boolean compareFilters(Filter appFilters, Filter restFilters){
+        int checked = 0;
+        int checkedFilters = appFilters.getCheckedCats();
+
+        for(int i = 0; i<appFilters.length() ; i++){
+            Log.d("Comparing: " + checkedFilters , appFilters.getCategoryStatus(i) + "//" + restFilters.getCategoryStatus(i));
+            if(appFilters.getCategoryStatus(i) == true && restFilters.getCategoryStatus(i) == true){
+                Log.d("Bo","Returning");
+                checked++;
+                if(checked == checkedFilters) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+
+    }
+   **/
+
 }

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -23,10 +24,16 @@ public class Restaurant implements Serializable{
     private int ID;
     private int rating;
 
-    private byte[] restaurantPicRaw;
-    private byte[] logoRaw;
+    private String imagePathRes;
+    private String imagePathLogo;
+    private ArrayList<String> filters;
 
-    private Filter restaurantFilter;
+    /**
+     private byte[] restaurantPicRaw;
+     private byte[] logoRaw;
+     private Filter restaurantFilter;
+     **/
+
     private LinkedList<Offers> offerList;
 
     private double latitude;
@@ -73,17 +80,30 @@ public class Restaurant implements Serializable{
     public void setRating(int rating) {
         this.rating = rating;
     }
+    /**
+     public void setRestaurantPicRaw(byte[] restaurantPicRaw){
+     this.restaurantPicRaw = restaurantPicRaw;
+     }
 
-    public void setRestaurantPicRaw(byte[] restaurantPicRaw){
-        this.restaurantPicRaw = restaurantPicRaw;
+     public void setLogoRaw(byte[] logoRaw){
+     this.logoRaw = logoRaw;
+     }
+
+     public void setRestaurantFilter(Filter restaurantFilter) {
+     this.restaurantFilter = restaurantFilter;
+     }
+     **/
+
+    public void setImageLogoPath(String imagePathLogo){
+        this.imagePathLogo = imagePathLogo;
     }
 
-    public void setLogoRaw(byte[] logoRaw){
-        this.logoRaw = logoRaw;
+    public void setImageResPath(String imagePathRes){
+        this.imagePathRes = imagePathRes;
     }
 
-    public void setRestaurantFilter(Filter restaurantFilter) {
-        this.restaurantFilter = restaurantFilter;
+    public void setFilters(ArrayList<String> filters){
+        this.filters = filters;
     }
 
     public void setOfferList(LinkedList<Offers> offerList) {
@@ -134,17 +154,30 @@ public class Restaurant implements Serializable{
     public int getRating() {
         return rating;
     }
+    /**
+     public Bitmap getRestaurantPic() {
+     return BitmapFactory.decodeByteArray(restaurantPicRaw, 0, restaurantPicRaw.length);
+     }
 
-    public Bitmap getRestaurantPic() {
-        return BitmapFactory.decodeByteArray(restaurantPicRaw, 0, restaurantPicRaw.length);
+     public Bitmap getLogo() {
+     return BitmapFactory.decodeByteArray(logoRaw, 0, logoRaw.length);
+     }
+
+     public Filter getRestaurantFilter() {
+     return restaurantFilter;
+     }
+     **/
+
+    public String getImageLogoPath(){
+        return this.imagePathLogo;
     }
 
-    public Bitmap getLogo() {
-        return BitmapFactory.decodeByteArray(logoRaw, 0, logoRaw.length);
+    public String getImageResPath(){
+        return this.imagePathRes;
     }
 
-    public Filter getRestaurantFilter() {
-        return restaurantFilter;
+    public ArrayList<String> getFilters(){
+        return this.filters;
     }
 
     public LinkedList<Offers> getOfferList() {

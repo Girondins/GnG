@@ -11,8 +11,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,15 +22,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnimationSet;
 import android.view.animation.BounceInterpolator;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,7 +34,6 @@ import android.widget.Toast;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.Style;
@@ -88,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     private ArrayList<Integer> subCategoriesCount = new ArrayList<Integer>();
 
     private int previousGroup = 0;
+    private int checkedBox = 0;
 
 
     //ICONS
@@ -146,13 +140,26 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         });
 
         ImageButton btnFavourite = (ImageButton) findViewById(R.id.tap_bar_btn_favourite);
+        ImageButton btnOffers = (ImageButton) findViewById(R.id.tap_bar_btn_offer);
+
+        assert btnOffers != null;
+        btnOffers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentOffers mOffersFragment = new FragmentOffers();
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.replace(R.id.drawer_layout, mOffersFragment).commit();
+            }
+        });
+
         assert btnFavourite != null;
         btnFavourite.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
                 FragmentFavourite mFavouriteFragment = new FragmentFavourite();
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.addToBackStack(null);
-                //fragmentTransaction.setCustomAnimations(R.anim.right_to_centre, R.anim.exit_to_right);
                 fragmentTransaction.replace(R.id.drawer_layout, mFavouriteFragment).commit();
             }
         });
@@ -214,6 +221,8 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
                         .build();
 
                 mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2), 5000, null);
+
+                controller.checkConnection();
             }
         });
 
@@ -282,15 +291,25 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     }
 
-
+    public LinkedList<Restaurant> getRestaurants(){
+        return controller.fetchRestaurants();
+    }
 
     public void setFilterSubCategories(View view) {
         CheckBox checkBox = (CheckBox) view;
         if (checkBox.isChecked()) {
             Toast.makeText(getApplicationContext(), checkBox.getContentDescription().toString(), Toast.LENGTH_SHORT).show();
-            //controller.setSubCategoryTrue(checkBox.getContentDescription().toString());
+            // controller.setSubCategoryTrue(checkBox.getContentDescription().toString());
+            controller.setFilterCategory(checkBox.getContentDescription().toString());
+            checkedBox++;
         } else {
-            //controller.setSubCategoryFalse(checkBox.getContentDescription().toString());
+            checkedBox--;
+            if(checkedBox == 0){
+                controller.initAllRest();
+                controller.onlyFilterRemoval(checkBox.getContentDescription().toString());
+            }else
+                controller.removeFilterCategory(checkBox.getContentDescription().toString());
+            // controller.setSubCategoryFalse(checkBox.getContentDescription().toString());
         }
     }
 
@@ -337,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     ArrayList<Marker> m = new ArrayList<Marker>();
 
     public void clearMarkers(){
-        //mMap.removeAnnotations();
+        mMap.removeAnnotations();
 
         for (Marker m1 : m){
             mMap.removeMarker(m1);
@@ -474,12 +493,10 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     private void populateArrayLists() {
 
-        String[] categoriesName = {"Asiatisk", "Europeisk", "Orientalisk", "Latin Amerikansk", "Allergi"};
-        String[] subAsian = {"Thailändsk", "Kinesisk", "Japansk", "Koreansk", "Vietnamesisk", "Mongolisk"};
-        String[] subEuro = {"Skandinavisk", "Italiensk", "Fransk", "Grekisk", "Spansk", "Balkan"};
-        String[] subOriental = {"Turkisk", "Libanesisk", "Irakisk", "Persisk"};
-        String[] subLatinAmerican = {"Brasilianskt", "Mexikanskt", "Argentinskt", "Kubansk"};
-        String[] subAllergies = {"Laktos", "Gluten", "Ägg", "Soya", "Skaldjur", "Nötter"};
+        String[] categoriesName = {"Filter"};
+        String[] subAsian = {"Turkisk", "Orientalisk", "Amerikansk", "Skandinavisk","Steakhouse",
+                "Bistro" , "Ekologiskt","Vegetarisk","Alternativ Vegetarisk", "Gryta","Sallad", "Fisk",
+                "Kebab", "Falafel", "Hamburgare", "Serveringstillstånd", };
 
         categories.clear();
 
@@ -499,50 +516,6 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
             drawerSubCategory.setSubCategory(subAsian[i]);
             tempSubCat.add(drawerSubCategory);
 
-        }
-
-        subCategories.add(tempSubCat);
-        subCategoriesCount.add(tempSubCat.size());
-
-        tempSubCat = new ArrayList<DrawerSubCategory>();
-
-        for (int i = 0; i < subEuro.length; i++) {
-            drawerSubCategory = new DrawerSubCategory();
-            drawerSubCategory.setSubCategory(subEuro[i]);
-            tempSubCat.add(drawerSubCategory);
-        }
-
-        subCategories.add(tempSubCat);
-        subCategoriesCount.add(tempSubCat.size());
-
-        tempSubCat = new ArrayList<DrawerSubCategory>();
-
-        for (int i = 0; i < subOriental.length; i++) {
-            drawerSubCategory = new DrawerSubCategory();
-            drawerSubCategory.setSubCategory(subOriental[i]);
-            tempSubCat.add(drawerSubCategory);
-        }
-
-        subCategories.add(tempSubCat);
-        subCategoriesCount.add(tempSubCat.size());
-
-        tempSubCat = new ArrayList<DrawerSubCategory>();
-
-        for (int i = 0; i < subLatinAmerican.length; i++) {
-            drawerSubCategory = new DrawerSubCategory();
-            drawerSubCategory.setSubCategory(subLatinAmerican[i]);
-            tempSubCat.add(drawerSubCategory);
-        }
-
-        subCategories.add(tempSubCat);
-        subCategoriesCount.add(tempSubCat.size());
-
-        tempSubCat = new ArrayList<DrawerSubCategory>();
-
-        for (int i = 0; i < subAllergies.length; i++) {
-            drawerSubCategory = new DrawerSubCategory();
-            drawerSubCategory.setSubCategory(subAllergies[i]);
-            tempSubCat.add(drawerSubCategory);
         }
 
         subCategories.add(tempSubCat);
