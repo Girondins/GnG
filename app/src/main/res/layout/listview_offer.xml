@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="120.8dp"
+    android:id="@+id/offers_layout"
+    android:background="@drawable/rounded_corners"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="120.8dp"
+        android:src="@drawable/gngxsmall"
+        android:id="@+id/offers_iv_icon" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120.8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/darkgrey"
+            android:id="@+id/offers_tv_name"
+            android:text="Restaurang namn"
+            android:textSize="24sp"
+            android:gravity="center|top"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/darkgrey"
+            android:id="@+id/offers_tv_address"
+            android:text="Någonting vägen lol"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_below="@id/offers_tv_name"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

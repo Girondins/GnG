@@ -4,7 +4,19 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/grabNgoDarker</item>
+        <item name="colorPrimaryDark">@color/grabNgoDarker</item>
+        <item name="android:navigationBarColor">@color/grabNgoDarker</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.Splash">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:background">@drawable/splash</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+
     </style>
 
 </resources>

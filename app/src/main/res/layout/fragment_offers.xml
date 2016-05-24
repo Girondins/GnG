@@ -1,0 +1,25 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.grabandgo.gng.gng.FragmentOffers"
+    android:background="@color/grabNgoBackground"
+    android:id="@+id/fragment_offers"
+    android:paddingTop="9dp"
+    android:paddingRight="3dp"
+    android:paddingStart="3dp"
+    android:paddingLeft="3dp"
+    android:paddingEnd="3dp"
+    android:paddingBottom="3dp">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fragment_offers_listview"
+        android:divider="@color/grabNgoBackground"
+        android:dividerHeight="4sp">
+    </ListView>
+
+
+</LinearLayout>

@@ -14,6 +14,7 @@
     <item name="darkgrey" type="color">#333333</item>
     <item name="white" type="color">#ffffff</item>
     <item name="grabNgo" type="color">#4FBB7B</item>
+    <item name="grabNgoDarker" type="color">#3c9b63</item>
     <item name="grabNgoText" type="color">#ffffff</item>
     <item name="grabNgoBackground" type="color">#ffffff</item>
     <item name="lightgrey" type="color">#f1f1f1</item>
