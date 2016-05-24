@@ -196,4 +196,12 @@ public class Restaurant implements Serializable{
     public OpenHours getOpenHours() {
         return openHours;
     }
+
+    public byte[] getLogoRaw(){
+        return logoRaw;
+    }
+
+    public byte[] getRestaurantPicRaw(){
+        return restaurantPicRaw;
+    }
 }
