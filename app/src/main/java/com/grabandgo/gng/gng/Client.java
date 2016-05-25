@@ -118,10 +118,7 @@ public class Client extends Thread {
                     Log.d("SENDTASK", request.toString());
                     oos.flush();
                 }
-//                if(receiver == null){
-//                    receiver = new Receive();
-//                    receiver.start();
-//                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

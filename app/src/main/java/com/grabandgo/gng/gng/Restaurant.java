@@ -26,6 +26,8 @@ public class Restaurant implements Serializable{
 
     private String imagePathRes;
     private String imagePathLogo;
+    private byte[] restImgByte;
+    private byte[] logoImgByte;
     private ArrayList<String> filters;
 
     /**
@@ -80,19 +82,6 @@ public class Restaurant implements Serializable{
     public void setRating(int rating) {
         this.rating = rating;
     }
-    /**
-     public void setRestaurantPicRaw(byte[] restaurantPicRaw){
-     this.restaurantPicRaw = restaurantPicRaw;
-     }
-
-     public void setLogoRaw(byte[] logoRaw){
-     this.logoRaw = logoRaw;
-     }
-
-     public void setRestaurantFilter(Filter restaurantFilter) {
-     this.restaurantFilter = restaurantFilter;
-     }
-     **/
 
     public void setImageLogoPath(String imagePathLogo){
         this.imagePathLogo = imagePathLogo;
@@ -154,19 +143,6 @@ public class Restaurant implements Serializable{
     public int getRating() {
         return rating;
     }
-    /**
-     public Bitmap getRestaurantPic() {
-     return BitmapFactory.decodeByteArray(restaurantPicRaw, 0, restaurantPicRaw.length);
-     }
-
-     public Bitmap getLogo() {
-     return BitmapFactory.decodeByteArray(logoRaw, 0, logoRaw.length);
-     }
-
-     public Filter getRestaurantFilter() {
-     return restaurantFilter;
-     }
-     **/
 
     public String getImageLogoPath(){
         return this.imagePathLogo;
@@ -197,11 +173,20 @@ public class Restaurant implements Serializable{
         return openHours;
     }
 
-    public byte[] getLogoRaw(){
-        return logoRaw;
+    public void setRestImgByte(byte[] restImgBytes){
+        this.restImgByte = restImgBytes;
     }
 
-    public byte[] getRestaurantPicRaw(){
-        return restaurantPicRaw;
+    public void setLogoImgByte(byte[] logoImgBytes){
+        this.logoImgByte = logoImgBytes;
     }
+
+    public byte[] getRestImgByte(){
+        return this.restImgByte;
+    }
+
+    public byte[] getLogoImgByte(){
+        return this.logoImgByte;
+    }
+
 }

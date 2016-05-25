@@ -2,6 +2,8 @@ package com.grabandgo.gng.gng;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,9 +91,12 @@ public class FragmentFavourite extends Fragment implements AdapterView.OnItemLon
 
                 restaurantName.setText(restaurant.getName());
                 restaurantAddress.setText(restaurant.getAddress());
-                //restaurantIcon.setImageDrawable(restaurant.getLogo().getDrawable());
+                byte[] b = restaurant.getLogoImgByte();
+                if(b != null){
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+                    restaurantIcon.setImageBitmap(bitmap);
+                }
             }
-
             return view;
         }
     }

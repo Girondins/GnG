@@ -5,12 +5,16 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -27,6 +31,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +41,7 @@ import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.constants.Style;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -43,6 +49,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Projection;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -69,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     private boolean markerSelected = false;
     private Marker selectedMarker;
     private RelativeLayout restaurantInfo;
-    final MoreInfoFragment moreInfoFragment = new MoreInfoFragment();
+    private MoreInfoFragment moreInfoFragment = new MoreInfoFragment();
 
     //TabBarMenu button.
     private TapBarMenu tapBarMenu;
@@ -82,14 +89,14 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     private int previousGroup = 0;
     private int checkedBox = 0;
+    private Restaurant selectedRestaurant = null;
 
 
     //ICONS
-
-    IconFactory iconFactory;
-    Bitmap bm;
-    Drawable d;
-    Icon icon2;
+    private IconFactory iconFactory;
+    private Bitmap bm;
+    private Drawable d;
+    private Icon icon2;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,6 +172,8 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         });
     }
 
+    private boolean cameraOK = false;
+
     /**
      * Init MapBox components.
      *
@@ -195,32 +204,27 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
                 mMap.setOnScrollListener(MainActivity.this);
                 mMap.setOnMapLongClickListener(MainActivity.this);
 
+                mMap.setMyLocationEnabled(true);
+                //mMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
 
+                mapboxMap.setStyleUrl(Style.DARK);
 
-                mapboxMap.setStyleUrl(Style.MAPBOX_STREETS);
+                if(!cameraOK) {
+                    CameraPosition cameraPosition2 = new CameraPosition.Builder()
+                            .target(new LatLng(55.59534300000001, 13.008302500000013)) // set the camera's center position
+                            .zoom(13.5)  // set the camera's zoom level
+                            .tilt(25)  // set the camera's tilt
+                            .build();
+
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2), 5000, null);
+                    cameraOK = true;
+                }
 
                 iconFactory = IconFactory.getInstance(MainActivity.this);
                 bm = BitmapFactory.decodeResource(getResources(),
                         R.drawable.loggadubbel);
                 d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bm, 80, 175, true));
                 icon2 = iconFactory.fromDrawable(d);
-
-                // Set the camera's starting position
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(new LatLng(45.59534300000001, 20.008302500000013)) // set the camera's center position
-                        .zoom(22)  // set the camera's zoom level
-                        .tilt(50)  // set the camera's tilt
-                        .build();
-
-                mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                CameraPosition cameraPosition2 = new CameraPosition.Builder()
-                        .target(new LatLng(55.59534300000001, 13.008302500000013)) // set the camera's center position
-                        .zoom(13.5)  // set the camera's zoom level
-                        .tilt(0)  // set the camera's tilt
-                        .build();
-
-                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2), 5000, null);
 
                 controller.checkConnection();
             }
@@ -237,62 +241,51 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     boolean isFav = false;
     private void initMarkerButtons(){
         markerButton = (ImageButton) findViewById(R.id.markerbutton);
-
-
         markerButton.setOnClickListener(new MarkerButtonClickListener());
-        /*
-        markerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                Log.d("GnG", "MARKER BUTTON CLICK");
-
-                final RelativeLayout container = (RelativeLayout) findViewById(R.id.fragment_container);
-                FragmentManager fragmentManager = getFragmentManager();
-                final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.add(R.id.fragment_container, moreInfoFragment, "More Info");
-                fragmentTransaction.commit();
-                closeMarker(selectedMarker);
-                mapView.animate().alpha(0.3f).setDuration(750).start();
-                tapBarMenu.setVisibility(View.INVISIBLE);
-                tapBarMenu.setVisibility(View.GONE);
-            }
-        });
-        */
 
         markerFavouritBtn = (ImageButton)findViewById(R.id.favoritebutton);
         markerFavouritBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(!isFav) {
+                boolean isFavorite = false;
+                int i = 0;
+                int foundI = 0;
+                for (Restaurant rest : getFavourites()){
+                    if(rest.getID() == selectedRestaurant.getID()){
+                        isFavorite = true;
+                        foundI = i;
+                    }
+                    i++;
+                }
+                if(!isFavorite) {
                     markerFavouritBtn.setImageResource(R.drawable.heartred);
-                    getFavourites().add(new Restaurant("Vigårda"));
+                    getFavourites().add(selectedRestaurant);
                 }else{
                     markerFavouritBtn.setImageResource(R.drawable.heartwhite);
-
-                    int i =0;
-                    for (Restaurant r : getFavourites()){
-                        if (r.getName().equals("Vigårda")){
-                            getFavourites().remove(i);
-                            i++;
-                        }
-                    }
+                    getFavourites().remove(foundI);
                 }
-
-                isFav = !isFav;
-
             }
         });
 
         markerDirectionsBtn = (ImageButton)findViewById(R.id.directionsButton);
+        markerDirectionsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
+
         markerRatingBtn = (ImageButton)findViewById(R.id.ratingbutton);
-
-
     }
 
     public LinkedList<Restaurant> getRestaurants(){
         return controller.fetchRestaurants();
+    }
+
+    public Restaurant getSelectedRestaurant(){
+        return this.selectedRestaurant;
     }
 
     public void setFilterSubCategories(View view) {
@@ -524,27 +517,46 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         tempSubCat = null;
     }
 
-    private class MarkerButtonClickListener implements Button.OnClickListener {
+    boolean moreInfoSet = false;
 
+    private class MarkerButtonClickListener implements Button.OnClickListener {
         @Override
         public void onClick(View v) {
             final RelativeLayout container = (RelativeLayout) findViewById(R.id.fragment_container);
             FragmentManager fragmentManager = getFragmentManager();
             final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.add(R.id.fragment_container, moreInfoFragment, "More Info");
-            fragmentTransaction.commit();
+            moreInfoFragment = MoreInfoFragment.newInstance(selectedRestaurant.getName(), selectedRestaurant.getRestImgByte());
 
+
+            if(!moreInfoSet) {
+                fragmentTransaction.add(R.id.fragment_container, moreInfoFragment, "More Info");
+            }else{
+                fragmentTransaction.replace(R.id.fragment_container, moreInfoFragment, "More Info");
+            }
+
+
+            fragmentTransaction.commit();
             closeMarker(selectedMarker);
 
             mapView.animate().alpha(0.3f).setDuration(750).start();
             tapBarMenu.setVisibility(View.INVISIBLE);
             tapBarMenu.setVisibility(View.GONE);
-
         }
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+
+        LinkedList<Restaurant> restaurants = getRestaurants();
+        for(Restaurant r : restaurants){
+            if(r.getID() == Integer.valueOf(marker.getTitle())){
+                selectedRestaurant = r;
+                Log.d("GnG", "SELECTED: " + r.getName());
+                break;
+            }
+        }
+
+        setUpRestaurantInfoOnClick();
 
         if (!markerSelected) {
             openMarker(marker);
@@ -553,18 +565,29 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         }
         markerSelected = true;
         selectedMarker = marker;
+        return true;
+    }
 
-        /*
-        //TODO: TEMP ID IGEN
-        if(controller != null && controller.getRestaurantList() != null) {
-            for (Restaurant r : controller.getRestaurantList()) {
-                if (Integer.toString(r.getID()).equals(marker.getTitle())) {
-                    restaurantSelected(r);
-                }
+    private void setUpRestaurantInfoOnClick(){
+
+        ImageView imageLogo = (ImageView)findViewById(R.id.restaurantLogoIV);
+        byte[] b = selectedRestaurant.getRestImgByte();
+        if(b != null) {
+            Bitmap bm = BitmapFactory.decodeByteArray(selectedRestaurant.getRestImgByte(), 0, selectedRestaurant.getRestImgByte().length);
+            imageLogo.setImageBitmap(bm);
+        }
+
+        boolean isFavorite = false;
+        for (Restaurant rest : getFavourites()){
+            if(rest.getID() == selectedRestaurant.getID()){
+                isFavorite = true;
             }
         }
-        */
-        return true;
+        if(isFavorite){
+            markerFavouritBtn.setImageResource(R.drawable.heartred);
+        }else{
+            markerFavouritBtn.setImageResource(R.drawable.heartwhite);
+        }
     }
 
     @Override

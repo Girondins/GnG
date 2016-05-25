@@ -1,6 +1,8 @@
 package com.grabandgo.gng.gng;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -26,17 +29,28 @@ import android.widget.TextView;
  */
 public class MoreInfoFragment extends Fragment {
 
-    private Button OkBtn;
+    private ImageButton OkBtn;
     private ImageView headerImageView, catImg1, catImg2, catImg3;
     private TextView titleTextView, catTxt1, catTxt2, catTxt3;
     private ScrollView scrollView;
 
+
+    private byte[] logoRaw;
+    private String title;
+
+
+
+
+
     View myView;
 
 
-    public static MoreInfoFragment newInstance(String param1, String param2) {
+    public static MoreInfoFragment newInstance(String name, byte[] bytes) {
         MoreInfoFragment fragment = new MoreInfoFragment();
         Bundle args = new Bundle();
+
+
+
         fragment.setArguments(args);
 
         return fragment;
@@ -45,6 +59,7 @@ public class MoreInfoFragment extends Fragment {
     public MoreInfoFragment() {
         // Required empty public constructor
     }
+
 
     private OnOkClickedListener mListener;
 
@@ -59,16 +74,6 @@ public class MoreInfoFragment extends Fragment {
         super.onStart();
         try {
             mListener = (OnOkClickedListener) getActivity();
-            headerImageView = (ImageView) getView().findViewById(R.id.header_image);
-            headerImageView.setClipToOutline(true);
-            titleTextView = (TextView)getView().findViewById(R.id.title_text_tv);
-
-
-            Typeface font = Typeface.createFromAsset(getActivity().getAssets(), "fonts/HelveticaNeueLight.ttf");
-
-            titleTextView.setTypeface(font);
-
-
 
         } catch (ClassCastException e) {
             throw new ClassCastException(getActivity().toString()
@@ -89,8 +94,22 @@ public class MoreInfoFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragmwwent
 
+
+
+
+
         View view =  inflater.inflate(R.layout.fragment_more_info, container, false);
-        OkBtn = (Button)view.findViewById(R.id.more_info_ok_btn);
+        titleTextView = (TextView)view.findViewById(R.id.title_text_tv);
+        Typeface font = Typeface.createFromAsset(getActivity().getAssets(), "fonts/HelveticaNeueLight.ttf");
+        titleTextView.setTypeface(font);
+        headerImageView = (ImageView)view.findViewById(R.id.header_image);
+        titleTextView = (TextView)view.findViewById(R.id.title_text_tv);
+        MainActivity activity = (MainActivity)getActivity();
+        Restaurant r = activity.getSelectedRestaurant();
+        setHeaderIcon(r.getLogoImgByte());
+        setTitle(r.getName());
+
+        OkBtn = (ImageButton)view.findViewById(R.id.more_info_ok_btn);
         OkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,8 +125,6 @@ public class MoreInfoFragment extends Fragment {
         catTxt1 = (TextView)view.findViewById(R.id.cat_txt_1);
         catTxt2 = (TextView)view.findViewById(R.id.cat_txt_2);
         catTxt3 = (TextView)view.findViewById(R.id.cat_txt_3);
-
-
 
         scrollView = (ScrollView)view.findViewById(R.id.scrollView);
 
@@ -133,8 +150,6 @@ public class MoreInfoFragment extends Fragment {
                     catTxt2.setAlpha(1-newAlpa);
                     catTxt3.setAlpha(1-newAlpa);
                 }
-
-
             }
         });
 
@@ -156,5 +171,17 @@ public class MoreInfoFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         public void onFragmentInteraction(Uri uri);
     }
+
+
+    public void setHeaderIcon(byte[] iconRaw){
+        Bitmap bm = BitmapFactory.decodeByteArray(iconRaw, 0, iconRaw.length);
+        headerImageView.setImageBitmap(bm);
+    }
+
+    public void setTitle(String title){
+        titleTextView.setText(title);
+    }
+
+
 
 }

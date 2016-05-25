@@ -1,44 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="120.8dp"
+    android:layout_height="wrap_content"
     android:id="@+id/offers_layout"
     android:background="@drawable/rounded_corners"
     android:orientation="horizontal">
 
-    <ImageView
-        android:layout_width="40dp"
+    <RelativeLayout
+        android:layout_width="120dp"
         android:layout_height="120.8dp"
-        android:src="@drawable/gngxsmall"
-        android:id="@+id/offers_iv_icon" />
+        android:gravity="center|left"
+        android:id="@+id/offers_layout_imageView">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/favourite_round_image"
+            android:src="@drawable/gngxsmall"
+            android:id="@+id/offers_iv_icon"
+            android:scaleType="fitXY"
+            />
+
+    </RelativeLayout>
     
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="120.8dp"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/offers_layout_imageView"
+        android:layout_toRightOf="@+id/offers_layout_imageView"
+        android:gravity="left"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:paddingEnd="7dp"
+        android:paddingRight="7dp"
+        android:paddingLeft="7dp"
+        android:paddingStart="7dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/darkgrey"
             android:id="@+id/offers_tv_name"
-            android:text="Restaurang namn"
-            android:textSize="24sp"
-            android:gravity="center|top"
+            android:text="ABCDEFGHIJKLMNOPQRSTUVXYZ"
+            android:textSize="22sp"
+            android:gravity="top|left"
             />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/darkgrey"
-            android:id="@+id/offers_tv_address"
-            android:text="Någonting vägen lol"
-            android:textSize="18sp"
-            android:gravity="center"
+            android:id="@+id/offers_tv_offer_name"
+            android:text="2 för 1 erbjudande"
+            android:textSize="16sp"
+            android:gravity="left"
             android:layout_below="@id/offers_tv_name"
             />
 
-    </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/darker_gray"
+            android:id="@+id/offers_tv_duration"
+            android:text="19/2/2016"
+            android:textSize="16sp"
+            android:gravity="left"
+            android:layout_below="@id/offers_tv_offer_name"
+            />
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/darker_gray"
+            android:id="@+id/offers_tv_whom"
+            android:text="studenter"
+            android:textSize="16sp"
+            android:gravity="left"
+            android:layout_below="@id/offers_tv_duration"
+            />
+
+    </RelativeLayout>
+
+</RelativeLayout>

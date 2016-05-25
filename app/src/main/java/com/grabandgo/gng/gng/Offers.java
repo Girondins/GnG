@@ -21,9 +21,12 @@ public class Offers implements Serializable{
     private String type;
     private String whom;
     private int restID;
+    private String restaurant;
 
-    //  private byte[] imageBytes;
+    private byte[] imageBytes;
+    private byte[] logoBytes;
     private String imagePath;
+
 
 
 
@@ -75,15 +78,15 @@ public class Offers implements Serializable{
     public String getType() {
         return type;
     }
-    /**
-     public void setImageBytes(byte[] imagebytes){
-     this.imageBytes = imagebytes;
-     }
 
-     public byte[] getImageBytes(){
-     return imageBytes;
-     }
-     **/
+    public void setImageBytes(byte[] imagebytes){
+        this.imageBytes = imagebytes;
+    }
+
+    public byte[] getImageBytes(){
+        return imageBytes;
+    }
+
 
     public void setImagePath(String imagePath){
         this.imagePath = imagePath;
@@ -108,4 +111,21 @@ public class Offers implements Serializable{
     public String getTitle(){
         return this.title;
     }
+
+    public void setRestaurant(String restaurant){
+        this.restaurant = restaurant;
+    }
+
+    public String getRestaurant(){
+        return this.restaurant;
+    }
+
+    public void setLogoByte(byte[] logoBytes){
+        this.logoBytes = logoBytes;
+    }
+
+    public byte[] getLogoByte(){
+        return this.logoBytes;
+    }
+
 }
